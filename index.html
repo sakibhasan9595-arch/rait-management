@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b5e">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Rait Management</title>
+<style>
+:root{--navy:#173b5e;--blue:#2e6f9e;--pale:#eaf2f8;--ink:#17212b;--muted:#647484;--line:#dce5ec;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fa;color:var(--ink);font:15px system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+header{background:var(--navy);color:white;padding:18px 16px}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;color:#d6e4ef;font-size:13px}
+main{max-width:900px;margin:auto;padding:16px}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #142c4210}
+h2{font-size:18px;margin:0 0 12px;color:var(--navy)}h3{font-size:16px;margin:12px 0 8px}
+input,select,textarea,button{font:inherit;width:100%;padding:11px 12px;border-radius:9px;border:1px solid #cbd7e1;margin:5px 0}
+button{background:var(--navy);color:white;border:0;font-weight:650;cursor:pointer}button.secondary{background:var(--pale);color:var(--navy);border:1px solid #cbdce9}button.danger{background:#a52d36}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tabs button{width:auto;padding:9px 13px}.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}.item{border:1px solid var(--line);padding:11px;border-radius:9px;margin:8px 0}.pill{display:inline-block;background:var(--pale);color:var(--navy);padding:3px 8px;border-radius:20px;font-size:12px}.status{padding:10px;background:#fff7df;border-radius:8px;color:#674e0b;margin:8px 0}.good{background:#e8f6ee;color:#145b32}.bad{background:#fdecee;color:#8a1e2b}label{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><h1>Rait Management</h1><p>Sales · Stock · Reports · Team Access</p></header>
+<main>
+<div id="notice" class="status hidden"></div>
+<section id="authView">
+ <div class="card">
+  <h2>Login</h2>
+  <input id="loginEmail" type="email" placeholder="Email address" autocomplete="username">
+  <input id="loginPass" type="password" placeholder="Password" autocomplete="current-password">
+  <button id="loginBtn">Login</button>
+ </div>
+ <div class="card">
+  <h2>নতুন ব্যবহারকারী? Registration Request</h2>
+  <p class="muted">অ্যাকাউন্ট তৈরি করে অনুমোদনের জন্য Owner-এর কাছে অনুরোধ পাঠাও। অনুমোদনের আগে ব্যবসার তথ্য দেখা যাবে না।</p>
+  <input id="regName" placeholder="তোমার নাম">
+  <input id="regEmail" type="email" placeholder="Email address">
+  <input id="regPass" type="password" placeholder="Password (কমপক্ষে ৬ অক্ষর)">
+  <button id="registerBtn" class="secondary">Request Access</button>
+ </div>
+</section>
+<section id="pendingView" class="hidden">
+ <div class="card"><h2>অনুমোদনের অপেক্ষায়</h2><p>তোমার registration request পাঠানো হয়েছে। Owner অনুমোদন না দেওয়া পর্যন্ত ব্যবসার তথ্য দেখা যাবে না।</p><button id="pendingLogout" class="secondary">Logout</button></div>
+</section>
+<section id="appView" class="hidden">
+ <div class="card">
+  <div class="row"><div><strong id="welcome"></strong><div class="muted" id="roleText"></div></div><div><button id="logoutBtn" class="secondary">Logout</button></div></div>
+ </div>
+ <div class="tabs">
+  <button data-tab="salesPanel">Sales</button><button data-tab="stockPanel">Stock</button><button data-tab="reportsPanel">Reports</button><button data-tab="usersPanel" id="usersTab" class="hidden">User Approval</button>
+ </div>
+ <section id="salesPanel" class="card">
+  <h2>Sales Entry</h2>
+  <div class="row">
+   <div><label>Date</label><input id="sDate" type="date"></div>
+   <div><label>Today's Order (৳)</label><input id="sOrder" type="number" min="0" placeholder="0"></div>
+   <div><label>B2C Order Amount (৳)</label><input id="sB2C" type="number" min="0" placeholder="0"></div>
+   <div><label>Shop Count</label><input id="sShop" type="number" min="0" placeholder="0"></div>
+   <div><label>Delivery Amount (৳)</label><input id="sDelivery" type="number" min="0" placeholder="0"></div>
+   <div><label>Cash (৳)</label><input id="sCash" type="number" min="0" placeholder="0"></div>
+   <div><label>Credit (৳)</label><input id="sCredit" type="number" min="0" placeholder="0"></div>
+   <div><label>Due Collection (৳)</label><input id="sDue" type="number" min="0" placeholder="0"></div>
+   <div><label>Total Collection (৳)</label><input id="sTotal" type="number" min="0" placeholder="0"></div>
+   <div><label>Cancelled Amount (৳)</label><input id="sCancel" type="number" min="0" placeholder="0"></div>
+  </div>
+  <label>Products sold (e.g. Product A: 5, Product B: 3)</label><textarea id="sProducts" rows="2" placeholder="Product name and quantity"></textarea>
+  <button id="saveSale">Save Sales Entry</button>
+  <div id="salesList"></div>
+ </section>
+ <section id="stockPanel" class="card hidden">
+  <h2>Stock Management</h2>
+  <h3>Add Product</h3><div class="row"><input id="pName" placeholder="Product name"><input id="pVariant" placeholder="Variant (e.g. 100 pages)"><input id="pOpening" type="number" min="0" placeholder="Opening stock"></div><button id="addProduct">Add Product</button>
+  <h3>Restock</h3><div class="row"><select id="rProduct"></select><input id="rQty" type="number" min="1" placeholder="Quantity"><input id="rDate" type="date"></div><button id="addRestock">Save Restock</button>
+  <h3>Products & Remaining Stock</h3><div id="productsList"></div>
+ </section>
+ <section id="reportsPanel" class="card hidden"><h2>Daily Sales Reports</h2><div id="reportList"></div></section>
+ <section id="usersPanel" class="card hidden"><h2>Registration Requests</h2><div id="requestsList"></div></section>
+</section>
+</main>
+<script type="module" src="app.js"></script>
+</body></html>

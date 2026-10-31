@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function activeUser() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.active == true;
+    }
+    function isOwner() {
+      return activeUser()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "owner";
+    }
+    function hasPermission(permission) {
+      return activeUser()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions[permission] == true;
+    }
+    match /registrationRequests/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == "pending";
+      allow read: if isOwner() || (signedIn() && request.auth.uid == uid);
+      allow update, delete: if isOwner();
+    }
+    match /users/{userId} {
+      allow read: if isOwner() || (activeUser() && request.auth.uid == userId);
+      allow create, update, delete: if isOwner();
+    }
+    match /sales/{documentId} {
+      allow read: if hasPermission("salesRead") || isOwner();
+      allow create: if hasPermission("salesCreate") || isOwner();
+      allow update: if hasPermission("salesEdit") || isOwner();
+      allow delete: if hasPermission("salesDelete") || isOwner();
+    }
+    match /products/{documentId} {
+      allow read: if hasPermission("stockRead") || isOwner();
+      allow create: if hasPermission("stockCreate") || isOwner();
+      allow update: if hasPermission("stockEdit") || isOwner();
+      allow delete: if hasPermission("stockDelete") || isOwner();
+    }
+    match /restocks/{documentId} {
+      allow read: if hasPermission("stockRead") || isOwner();
+      allow create: if hasPermission("stockCreate") || isOwner();
+      allow update: if hasPermission("stockEdit") || isOwner();
+      allow delete: if hasPermission("stockDelete") || isOwner();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
