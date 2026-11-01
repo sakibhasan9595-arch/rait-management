@@ -1215,7 +1215,8 @@ getSaleItems(sale).forEach(item => {
   dailyProductTotals[date][key].quantity +=
     Number(item.quantity || 0);
 
-});
+}); 
+    }); 
 
 
   // DAILY REPORT HTML
