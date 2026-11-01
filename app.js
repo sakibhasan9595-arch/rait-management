@@ -888,9 +888,36 @@ function renderProducts() {
   }
 
   if ($("productsList")) {
+    const stockSummary = `
+  <div class="item">
+    <h3>Current Stock Summary</h3>
+
+    ${
+      products.length
+        ? products.map(p => `
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              gap:10px;
+              padding:8px 0;
+              border-bottom:1px solid #ddd;
+            ">
+              <div>
+                <b>${esc(p.name)}</b>
+                <div class="muted">${esc(p.variant)}</div>
+              </div>
+
+              <b>${remaining(p)}</b>
+            </div>
+          `).join("")
+        : `<div class="muted">কোনো Product নেই।</div>`
+    }
+  </div>
+`;
 
     $("productsList").innerHTML =
-      products.map(p => {
+  stockSummary +
+  products.map(p => {
 
         const productRestocks = restocks
           .filter(r => r.productId === p.id)
