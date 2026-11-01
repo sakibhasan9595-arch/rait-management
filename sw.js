@@ -1,4 +1,4 @@
-const CACHE = "rait-management-shell-v6";
+const CACHE = "rait-management-shell-v7";
 
 const FILES = [
   "./",
