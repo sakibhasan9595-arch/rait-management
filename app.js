@@ -1026,23 +1026,6 @@ Total Collection: ${money(x.collection)}<br>
 
 Cancelled: ${money(x.cancelled)}
 
-        ${
-          dailyProductTotals[date]
-            ? `
-              <div style="margin-top:10px">
-                <b>Products Sold:</b>
-                ${Object.values(dailyProductTotals[date])
-                  .map(item => `
-                    <div>
-                      ${esc(item.name)} — ${esc(item.variant)}
-                      : ${item.quantity}
-                    </div>
-                  `).join("")
-                }
-              </div>
-            `
-            : ""
-        }
 
       </div>
 
