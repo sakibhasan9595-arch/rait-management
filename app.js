@@ -1145,6 +1145,7 @@ function renderReports() {
 
   const groups = {};
   const productTotals = {};
+const dailyProductTotals = {};
 
   sales.forEach(sale => {
 
@@ -1186,27 +1187,35 @@ groups[date].count++;
 });
 
 
-    // PRODUCT TOTALS
+// PRODUCT TOTALS + DATE-WISE PRODUCT TOTALS
 
-    getSaleItems(sale).forEach(item => {
+dailyProductTotals[date] ??= {};
 
-      const key =
-        item.productId ||
-        `${item.name}-${item.variant}`;
+getSaleItems(sale).forEach(item => {
 
-      productTotals[key] ??= {
-        name: item.name || "Unknown",
-        variant: item.variant || "",
-        quantity: 0
-      };
+  const key =
+    item.productId ||
+    `${item.name}-${item.variant}`;
 
-      productTotals[key].quantity +=
-        Number(item.quantity || 0);
+  productTotals[key] ??= {
+    name: item.name || "Unknown",
+    variant: item.variant || "",
+    quantity: 0
+  };
 
+  productTotals[key].quantity +=
+    Number(item.quantity || 0);
 
-    });
+  dailyProductTotals[date][key] ??= {
+    name: item.name || "Unknown",
+    variant: item.variant || "",
+    quantity: 0
+  };
 
-  });
+  dailyProductTotals[date][key].quantity +=
+    Number(item.quantity || 0);
+
+});
 
 
   // DAILY REPORT HTML
@@ -1239,6 +1248,20 @@ Total Collection: ${money(x.collection)}<br>
 
 Cancelled: ${money(x.cancelled)}
 
+<br><br>
+
+<b>Product Sold:</b>
+
+${
+  Object.values(dailyProductTotals[date] || {})
+    .map(item => `
+      <div style="margin-left:10px; margin-top:5px">
+        ${esc(item.name)} — ${esc(item.variant)}:
+        <b>${item.quantity} pcs</b>
+      </div>
+    `).join("") ||
+    `<div class="muted">কোনো Product বিক্রি হয়নি।</div>`
+}
 
       </div>
 
