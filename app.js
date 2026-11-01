@@ -876,10 +876,10 @@ function remaining(p) {
 // PRODUCT LIST
 // ==========================================
 
+
 function renderProducts() {
 
   if ($("rProduct")) {
-
     $("rProduct").innerHTML = products.map(p => `
       <option value="${esc(p.id)}">
         ${esc(p.name)} — ${esc(p.variant)}
@@ -890,23 +890,223 @@ function renderProducts() {
   if ($("productsList")) {
 
     $("productsList").innerHTML =
-      products.map(p => `
-        <div class="item">
+      products.map(p => {
 
-          <b>${esc(p.name)}</b>
-          · ${esc(p.variant)}
+        const productRestocks = restocks
+          .filter(r => r.productId === p.id)
+          .sort((a, b) =>
+            (b.date || "").localeCompare(a.date || "")
+          );
 
-          <span class="pill">
-            Remaining: ${remaining(p)}
-          </span>
+        return `
+          <div class="item">
 
-        </div>
-      `).join("") ||
+            <b>${esc(p.name)}</b>
+            · ${esc(p.variant)}
+
+            <div style="margin:8px 0">
+              Opening Stock: ${Number(p.opening || 0)}
+              <br>
+              <b>Remaining: ${remaining(p)}</b>
+            </div>
+
+            ${
+              perms("stockEdit")
+                ? `
+                  <button
+                    class="secondary"
+                    data-edit-opening="${esc(p.id)}"
+                  >Edit Opening Stock</button>
+                `
+                : ""
+            }
+
+            ${
+              productRestocks.length
+                ? `
+                  <div style="margin-top:12px">
+                    <b>Restock History</b>
+                    ${productRestocks.map(r => `
+                      <div class="item">
+
+                        Date: ${esc(r.date || "")}
+                        <br>
+                        Quantity: ${Number(r.quantity || 0)}
+
+                        ${
+                          perms("stockEdit")
+                            ? `
+                              <button
+                                class="secondary"
+                                data-edit-restock="${esc(r.id)}"
+                              >Edit Restock</button>
+                            `
+                            : ""
+                        }
+
+                        ${
+                          perms("stockDelete")
+                            ? `
+                              <button
+                                class="danger"
+                                data-delete-restock="${esc(r.id)}"
+                              >Delete Restock</button>
+                            `
+                            : ""
+                        }
+
+                      </div>
+                    `).join("")}
+                  </div>
+                `
+                : `<div class="muted">কোনো Restock Entry নেই।</div>`
+            }
+
+          </div>
+        `;
+      }).join("") ||
       "এখনো কোনো product যোগ করা হয়নি।";
   }
 
+  // EDIT OPENING STOCK
+
+  document.querySelectorAll("[data-edit-opening]").forEach(b => {
+
+    b.addEventListener("click", async () => {
+
+      if (!perms("stockEdit")) {
+        return notice("Stock edit permission নেই।", "bad");
+      }
+
+      const product = products.find(
+        p => p.id === b.dataset.editOpening
+      );
+
+      if (!product) return;
+
+      const value = prompt(
+        "নতুন Opening Stock দাও:",
+        product.opening || 0
+      );
+
+      if (value === null) return;
+
+      const opening = Number(value);
+
+      if (!Number.isFinite(opening) || opening < 0) {
+        return notice("সঠিক Quantity দাও।", "bad");
+      }
+
+      try {
+
+        await updateDoc(
+          doc(db, "products", product.id),
+          { opening }
+        );
+
+        notice("Opening Stock আপডেট হয়েছে।", "good");
+
+        await refreshAll();
+
+      } catch (e) {
+        notice(friendly(e), "bad");
+      }
+    });
+  });
+
+
+  // EDIT RESTOCK
+
+  document.querySelectorAll("[data-edit-restock]").forEach(b => {
+
+    b.addEventListener("click", async () => {
+
+      if (!perms("stockEdit")) {
+        return notice("Stock edit permission নেই।", "bad");
+      }
+
+      const restock = restocks.find(
+        r => r.id === b.dataset.editRestock
+      );
+
+      if (!restock) return;
+
+      const quantityText = prompt(
+        "নতুন Restock Quantity:",
+        restock.quantity
+      );
+
+      if (quantityText === null) return;
+
+      const quantity = Number(quantityText);
+
+      if (!Number.isFinite(quantity) || quantity < 1) {
+        return notice("সঠিক Quantity দাও।", "bad");
+      }
+
+      const date = prompt(
+        "Restock Date (YYYY-MM-DD):",
+        restock.date || ""
+      );
+
+      if (date === null) return;
+
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return notice("সঠিক Date দাও।", "bad");
+      }
+
+      try {
+
+        await updateDoc(
+          doc(db, "restocks", restock.id),
+          {
+            quantity,
+            date
+          }
+        );
+
+        notice("Restock আপডেট হয়েছে।", "good");
+
+        await refreshAll();
+
+      } catch (e) {
+        notice(friendly(e), "bad");
+      }
+    });
+  });
+
+
+  // DELETE RESTOCK
+
+  document.querySelectorAll("[data-delete-restock]").forEach(b => {
+
+    b.addEventListener("click", async () => {
+
+      if (!perms("stockDelete")) {
+        return notice("Stock delete permission নেই।", "bad");
+      }
+
+      if (!confirm("এই Restock Entry Delete করবে?")) return;
+
+      try {
+
+        await deleteDoc(
+          doc(db, "restocks", b.dataset.deleteRestock)
+        );
+
+        notice("Restock Entry Delete হয়েছে।", "good");
+
+        await refreshAll();
+
+      } catch (e) {
+        notice(friendly(e), "bad");
+      }
+    });
+  });
+
   renderSaleProductPicker();
-                          }
+}
+
       
 // ==========================================
 // DAILY + PRODUCT-WISE REPORTS
