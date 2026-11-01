@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
@@ -22,6 +23,9 @@ import {
   enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+
+// FIREBASE CONFIG
+
 const firebaseConfig = {
   apiKey: "AIzaSyDGV8Hcmj8bFheKxSUeTctDASR78-SBeLA",
   authDomain: "rait-management-b9280.firebaseapp.com",
@@ -37,7 +41,11 @@ const db = getFirestore(app);
 
 enableIndexedDbPersistence(db).catch(() => {});
 
+
+// HELPERS
+
 const $ = id => document.getElementById(id);
+
 const show = id => $(id)?.classList.remove("hidden");
 const hide = id => $(id)?.classList.add("hidden");
 
@@ -61,25 +69,27 @@ function num(id) {
   return Number(val(id) || 0);
 }
 
-let currentUser = null;
-let profile = null;
-let products = [];
-let sales = [];
-let restocks = [];
-
-const perms = p =>
-  profile?.role === "owner" ||
-  profile?.permissions?.[p] === true;
-
-const money = n =>
-  "৳" + Number(n || 0).toLocaleString("en-BD");
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[c]);
 }
 
-if ($("sDate")) $("sDate").value = today();
-if ($("rDate")) $("rDate").value = today();
+function money(n) {
+  return "৳" + Number(n || 0).toLocaleString("en-BD");
+}
+
+function today() {
+  const d = new Date();
+  const offset = d.getTimezoneOffset();
+  return new Date(d.getTime() - offset * 60000)
+    .toISOString()
+    .slice(0, 10);
+}
 
 function friendly(e) {
   return ({
@@ -95,6 +105,28 @@ function friendly(e) {
       "ইন্টারনেট সংযোগ পরীক্ষা করো।"
   })[e.code] || e.message || String(e);
 }
+
+
+// GLOBAL DATA
+
+let currentUser = null;
+let profile = null;
+
+let products = [];
+let sales = [];
+let restocks = [];
+
+let saleDraftItems = [];
+
+const perms = p =>
+  profile?.role === "owner" ||
+  profile?.permissions?.[p] === true;
+
+
+// DEFAULT DATES
+
+if ($("sDate")) $("sDate").value = today();
+if ($("rDate")) $("rDate").value = today();
 
 
 // LOGIN
@@ -158,10 +190,9 @@ $("logoutBtn")?.addEventListener("click", () => signOut(auth));
 $("pendingLogout")?.addEventListener("click", () => signOut(auth));
 
 
-// OWNER PROFILE DIAGNOSTIC
+// OWNER PROFILE / AUTH STATE
 
 onAuthStateChanged(auth, async user => {
-
   currentUser = user;
   profile = null;
 
@@ -211,7 +242,7 @@ onAuthStateChanged(auth, async user => {
       show("pendingView");
 
       notice(
-        `Approval সমস্যা: active=${String(profile.active)} (${typeof profile.active}), role=${String(profile.role)}. UID: ${user.uid}`,
+        `Approval সমস্যা: active=${String(profile.active)} (${typeof profile.active}), role=${String(profile.role)}, UID: ${user.uid}`,
         "bad"
       );
 
@@ -236,6 +267,8 @@ onAuthStateChanged(auth, async user => {
 
     if (profile.role === "owner") {
       show("usersTab");
+    } else {
+      hide("usersTab");
     }
 
     await refreshAll();
@@ -276,7 +309,7 @@ async function readCol(name) {
 }
 
 
-// REFRESH
+// REFRESH ALL DATA
 
 async function refreshAll() {
 
@@ -289,7 +322,9 @@ async function refreshAll() {
   if (perms("stockRead")) {
     products = await readCol("products");
     restocks = await readCol("restocks");
+
     renderProducts();
+    renderSaleProductPicker();
   }
 
   if (profile?.role === "owner") {
@@ -298,7 +333,174 @@ async function refreshAll() {
 }
 
 
+// ==========================================
+// PRODUCT SELECTOR IN SALES ENTRY
+// ==========================================
+
+function setupSaleProductPicker() {
+  const oldInput = $("sProducts");
+
+  if (!oldInput || $("saleProductPicker")) return;
+
+  const wrapper = document.createElement("div");
+
+  wrapper.id = "saleProductPicker";
+
+  wrapper.innerHTML = `
+    <h3>Products Sold</h3>
+
+    <div style="
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    ">
+      <select
+        id="saleProductSelect"
+        style="flex:2;min-width:160px"
+      ></select>
+
+      <input
+        id="saleProductQty"
+        type="number"
+        min="1"
+        step="1"
+        placeholder="Quantity"
+        style="flex:1;min-width:100px"
+      >
+
+      <button
+        type="button"
+        id="addSaleProduct"
+      >Add Product</button>
+    </div>
+
+    <div id="saleProductRows"></div>
+  `;
+
+  oldInput.parentNode.insertBefore(wrapper, oldInput);
+
+  oldInput.style.display = "none";
+
+  if (
+    oldInput.previousElementSibling &&
+    oldInput.previousElementSibling.tagName === "LABEL"
+  ) {
+    oldInput.previousElementSibling.style.display = "none";
+  }
+
+  $("addSaleProduct").addEventListener("click", () => {
+
+    const productId = val("saleProductSelect");
+    const quantity = Number(val("saleProductQty"));
+
+    const product = products.find(p => p.id === productId);
+
+    if (!product) {
+      return notice(
+        "আগে Stock থেকে Product যোগ করো।",
+        "bad"
+      );
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return notice("সঠিক Quantity দাও।", "bad");
+    }
+
+    const existing = saleDraftItems.find(
+      x => x.productId === productId
+    );
+
+    const alreadyAdded = existing?.quantity || 0;
+    const available = remaining(product);
+
+    if (alreadyAdded + quantity > available) {
+      return notice(
+        `Available stock ${available}। এই পণ্যের জন্য মোট ${alreadyAdded + quantity} দিতে চেয়েছ।`,
+        "bad"
+      );
+    }
+
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      saleDraftItems.push({
+        productId: product.id,
+        name: product.name,
+        variant: product.variant,
+        quantity
+      });
+    }
+
+    $("saleProductQty").value = "";
+
+    renderSaleDraftItems();
+  });
+
+  renderSaleProductPicker();
+  renderSaleDraftItems();
+  }
+    
+// UPDATE PRODUCT DROPDOWN
+
+function renderSaleProductPicker() {
+  const select = $("saleProductSelect");
+
+  if (!select) return;
+
+  select.innerHTML = products.map(p => `
+    <option value="${esc(p.id)}">
+      ${esc(p.name)} — ${esc(p.variant)}
+      (Stock: ${remaining(p)})
+    </option>
+  `).join("");
+
+  if (!products.length) {
+    select.innerHTML = `
+      <option value="">No products available</option>
+    `;
+  }
+}
+
+
+// SELECTED PRODUCT LIST
+
+function renderSaleDraftItems() {
+  const box = $("saleProductRows");
+
+  if (!box) return;
+
+  box.innerHTML = saleDraftItems.map((item, index) => `
+    <div class="item">
+      <b>${esc(item.name)} — ${esc(item.variant)}</b>
+      · Quantity: ${item.quantity}
+
+      <button
+        type="button"
+        class="secondary"
+        data-remove-sale-product="${index}"
+      >Remove</button>
+    </div>
+  `).join("") || "এখনো কোনো Product নির্বাচন করা হয়নি।";
+
+  box.querySelectorAll("[data-remove-sale-product]").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      saleDraftItems.splice(
+        Number(button.dataset.removeSaleProduct),
+        1
+      );
+
+      renderSaleDraftItems();
+    });
+  });
+}
+
+
+// ==========================================
 // SALES ENTRY
+// ==========================================
 
 $("saveSale")?.addEventListener("click", async () => {
 
@@ -307,36 +509,158 @@ $("saveSale")?.addEventListener("click", async () => {
   }
 
   try {
+
+    if (!val("sDate")) {
+      return notice("Sales date নির্বাচন করো।", "bad");
+    }
+
+    if (!saleDraftItems.length) {
+      return notice(
+        "কমপক্ষে একটি Product ও Quantity যোগ করো।",
+        "bad"
+      );
+    }
+
+    // CHECK STOCK
+
+    for (const item of saleDraftItems) {
+
+      const product = products.find(
+        p => p.id === item.productId
+      );
+
+      if (!product) {
+        return notice(
+          "একটি Product Stock-এ পাওয়া যাচ্ছে না।",
+          "bad"
+        );
+      }
+
+      if (item.quantity > remaining(product)) {
+        return notice(
+          `${product.name} — ${product.variant}: Stock আছে ${remaining(product)}, বিক্রি দিতে চেয়েছ ${item.quantity}`,
+          "bad"
+        );
+      }
+    }
+
+    const structuredItems = saleDraftItems.map(item => ({
+      productId: item.productId,
+      name: item.name,
+      variant: item.variant,
+      quantity: item.quantity
+    }));
+
     const data = {
       date: val("sDate"),
+
       order: num("sOrder"),
       b2c: num("sB2C"),
       shopCount: num("sShop"),
       delivery: num("sDelivery"),
+
       cash: num("sCash"),
       credit: num("sCredit"),
       dueCollection: num("sDue"),
       totalCollection: num("sTotal"),
+
       cancelled: num("sCancel"),
-      productsText: val("sProducts"),
+
+      // STRUCTURED PRODUCT DATA
+      productItems: structuredItems,
+
+      // OLD TEXT FIELD FOR COMPATIBILITY
+      productsText: structuredItems.map(item =>
+        `${item.name} ${item.variant}: ${item.quantity}`
+      ).join(", "),
+
       createdBy: currentUser.uid,
       createdAt: serverTimestamp()
     };
 
     await addDoc(collection(db, "sales"), data);
 
+    saleDraftItems = [];
+
+    renderSaleDraftItems();
+
+    if ($("sProducts")) {
+      $("sProducts").value = "";
+    }
+
     notice("Sales entry সংরক্ষিত হয়েছে।", "good");
+
     await refreshAll();
 
   } catch (e) {
+    console.error(e);
     notice(friendly(e), "bad");
   }
 });
 
 
+// ==========================================
+// GET PRODUCT ITEMS FROM SALES
+// ==========================================
+
+function getSaleItems(sale) {
+
+  // NEW STRUCTURED SALES
+
+  if (Array.isArray(sale.productItems)) {
+    return sale.productItems;
+  }
+
+  // OLD TEXT-BASED SALES
+
+  const text = String(sale.productsText || "");
+
+  const items = [];
+
+  text.split(",").forEach(part => {
+
+    const match = part.match(/^(.*?):\s*(\d+)\s*$/);
+
+    if (!match) return;
+
+    const label = match[1].trim();
+    const quantity = Number(match[2]);
+
+    const product = products.find(p => {
+
+      const fullName =
+        `${p.name} ${p.variant}`.toLowerCase();
+
+      const alternateName =
+        `${p.name} — ${p.variant}`.toLowerCase();
+
+      return (
+        fullName === label.toLowerCase() ||
+        alternateName === label.toLowerCase()
+      );
+    });
+
+    if (product && quantity > 0) {
+
+      items.push({
+        productId: product.id,
+        name: product.name,
+        variant: product.variant,
+        quantity
+      });
+    }
+  });
+
+  return items;
+}
+
+
+// ==========================================
 // SALES LIST
+// ==========================================
 
 function renderSales() {
+
   if (!$("salesList")) return;
 
   $("salesList").innerHTML =
@@ -348,19 +672,46 @@ function renderSales() {
         (b.date || "").localeCompare(a.date || "")
       )
       .slice(0, 15)
-      .map(s => `
-        <div class="item">
-          <b>${esc(s.date || "")}</b>
-          · Order ${money(s.order)}
-          · Collection ${money(s.totalCollection)}
-          <button class="secondary" data-del-sale="${s.id}">
-            Delete
-          </button>
-        </div>
-      `)
+      .map(s => {
+
+        const items = getSaleItems(s);
+
+        const itemText = items.map(item =>
+          `${esc(item.name)} ${esc(item.variant)}: ${Number(item.quantity)}`
+        ).join(", ");
+
+        return `
+          <div class="item">
+
+            <b>${esc(s.date || "")}</b>
+
+            · Order ${money(s.order)}
+            · Collection ${money(s.totalCollection)}
+
+            ${
+              itemText
+                ? `<div style="margin-top:6px">${itemText}</div>`
+                : ""
+            }
+
+            ${
+              perms("salesDelete")
+                ? `
+                  <button
+                    class="secondary"
+                    data-del-sale="${esc(s.id)}"
+                  >Delete</button>
+                `
+                : ""
+            }
+
+          </div>
+        `;
+      })
       .join("");
 
   document.querySelectorAll("[data-del-sale]").forEach(b => {
+
     b.addEventListener("click", async () => {
 
       if (!perms("salesDelete")) {
@@ -370,8 +721,15 @@ function renderSales() {
       if (!confirm("এই entry delete করবে?")) return;
 
       try {
-        await deleteDoc(doc(db, "sales", b.dataset.delSale));
+
+        await deleteDoc(
+          doc(db, "sales", b.dataset.delSale)
+        );
+
+        notice("Sales entry delete হয়েছে।", "good");
+
         await refreshAll();
+
       } catch (e) {
         notice(friendly(e), "bad");
       }
@@ -380,7 +738,9 @@ function renderSales() {
 }
 
 
+// ==========================================
 // ADD PRODUCT
+// ==========================================
 
 $("addProduct")?.addEventListener("click", async () => {
 
@@ -391,15 +751,28 @@ $("addProduct")?.addEventListener("click", async () => {
   const name = val("pName").trim();
   const variant = val("pVariant").trim();
 
+  const opening = num("pOpening");
+
   if (!name || !variant) {
-    return notice("Product name ও variant দাও।", "bad");
+    return notice(
+      "Product name ও variant দাও।",
+      "bad"
+    );
+  }
+
+  if (opening < 0) {
+    return notice(
+      "Opening stock ঋণাত্মক হতে পারে না।",
+      "bad"
+    );
   }
 
   try {
+
     await addDoc(collection(db, "products"), {
       name,
       variant,
-      opening: num("pOpening"),
+      opening,
       createdAt: serverTimestamp()
     });
 
@@ -408,6 +781,7 @@ $("addProduct")?.addEventListener("click", async () => {
     $("pOpening").value = "";
 
     notice("Product যোগ হয়েছে।", "good");
+
     await refreshAll();
 
   } catch (e) {
@@ -416,7 +790,9 @@ $("addProduct")?.addEventListener("click", async () => {
 });
 
 
+// ==========================================
 // ADD RESTOCK
+// ==========================================
 
 $("addRestock")?.addEventListener("click", async () => {
 
@@ -425,10 +801,14 @@ $("addRestock")?.addEventListener("click", async () => {
   }
 
   if (!val("rProduct") || num("rQty") < 1) {
-    return notice("Product ও quantity নির্বাচন করো।", "bad");
+    return notice(
+      "Product ও Quantity নির্বাচন করো।",
+      "bad"
+    );
   }
 
   try {
+
     await addDoc(collection(db, "restocks"), {
       productId: val("rProduct"),
       quantity: num("rQty"),
@@ -438,6 +818,7 @@ $("addRestock")?.addEventListener("click", async () => {
     });
 
     notice("Restock সংরক্ষিত হয়েছে।", "good");
+
     await refreshAll();
 
   } catch (e) {
@@ -446,54 +827,96 @@ $("addRestock")?.addEventListener("click", async () => {
 });
 
 
+// ==========================================
 // REMAINING STOCK
+// ==========================================
 
 function remaining(p) {
-  const rest = restocks
-    .filter(r => r.productId === p.id)
-    .reduce((a, r) => a + Number(r.quantity || 0), 0);
 
-  return Number(p.opening || 0) + rest;
+  const restocked = restocks
+    .filter(r => r.productId === p.id)
+    .reduce(
+      (sum, r) => sum + Number(r.quantity || 0),
+      0
+    );
+
+  const sold = sales.reduce((sum, sale) => {
+
+    const productQuantity = getSaleItems(sale)
+      .filter(item => item.productId === p.id)
+      .reduce(
+        (total, item) =>
+          total + Number(item.quantity || 0),
+        0
+      );
+
+    return sum + productQuantity;
+
+  }, 0);
+
+  return (
+    Number(p.opening || 0) +
+    restocked -
+    sold
+  );
 }
 
 
+// ==========================================
 // PRODUCT LIST
+// ==========================================
 
 function renderProducts() {
 
   if ($("rProduct")) {
+
     $("rProduct").innerHTML = products.map(p => `
-      <option value="${p.id}">
+      <option value="${esc(p.id)}">
         ${esc(p.name)} — ${esc(p.variant)}
       </option>
     `).join("");
   }
 
   if ($("productsList")) {
+
     $("productsList").innerHTML =
       products.map(p => `
         <div class="item">
+
           <b>${esc(p.name)}</b>
           · ${esc(p.variant)}
-          <span class="pill">Remaining: ${remaining(p)}</span>
+
+          <span class="pill">
+            Remaining: ${remaining(p)}
+          </span>
+
         </div>
       `).join("") ||
       "এখনো কোনো product যোগ করা হয়নি।";
   }
-}
 
-
-// DAILY REPORT
+  renderSaleProductPicker();
+                          }
+      
+// ==========================================
+// DAILY + PRODUCT-WISE REPORTS
+// ==========================================
 
 function renderReports() {
+
   if (!$("reportList")) return;
 
   const groups = {};
+  const productTotals = {};
+  const dailyProductTotals = {};
 
-  sales.forEach(s => {
-    const d = s.date || "Unknown";
+  sales.forEach(sale => {
 
-    groups[d] ??= {
+    const date = sale.date || "Unknown";
+
+    // DAILY TOTALS
+
+    groups[date] ??= {
       count: 0,
       order: 0,
       b2c: 0,
@@ -501,31 +924,148 @@ function renderReports() {
       cancelled: 0
     };
 
-    groups[d].count++;
-    groups[d].order += Number(s.order || 0);
-    groups[d].b2c += Number(s.b2c || 0);
-    groups[d].collection += Number(s.totalCollection || 0);
-    groups[d].cancelled += Number(s.cancelled || 0);
+    groups[date].count++;
+
+    groups[date].order +=
+      Number(sale.order || 0);
+
+    groups[date].b2c +=
+      Number(sale.b2c || 0);
+
+    groups[date].collection +=
+      Number(sale.totalCollection || 0);
+
+    groups[date].cancelled +=
+      Number(sale.cancelled || 0);
+
+
+    // PRODUCT TOTALS
+
+    getSaleItems(sale).forEach(item => {
+
+      const key =
+        item.productId ||
+        `${item.name}-${item.variant}`;
+
+      productTotals[key] ??= {
+        name: item.name || "Unknown",
+        variant: item.variant || "",
+        quantity: 0
+      };
+
+      productTotals[key].quantity +=
+        Number(item.quantity || 0);
+
+
+      // DATE-WISE PRODUCT TOTALS
+
+      dailyProductTotals[date] ??= {};
+
+      dailyProductTotals[date][key] ??= {
+        name: item.name || "Unknown",
+        variant: item.variant || "",
+        quantity: 0
+      };
+
+      dailyProductTotals[date][key].quantity +=
+        Number(item.quantity || 0);
+
+    });
+
   });
 
-  $("reportList").innerHTML =
-    Object.entries(groups)
-      .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([d, x]) => `
-        <div class="item">
-          <b>${d}</b><br>
-          Entries: ${x.count}
-          · Order: ${money(x.order)}
-          · B2C: ${money(x.b2c)}
-          · Collection: ${money(x.collection)}
-          · Cancelled: ${money(x.cancelled)}
-        </div>
-      `)
-      .join("") || "কোনো sales report নেই।";
+
+  // DAILY REPORT HTML
+
+  const dailyHTML = Object.entries(groups)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, x]) => `
+
+      <div class="item">
+
+        <b>${esc(date)}</b><br>
+
+        Entries: ${x.count}<br>
+
+        Order: ${money(x.order)}<br>
+
+        B2C: ${money(x.b2c)}<br>
+
+        Collection: ${money(x.collection)}<br>
+
+        Cancelled: ${money(x.cancelled)}
+
+        ${
+          dailyProductTotals[date]
+            ? `
+              <div style="margin-top:10px">
+                <b>Products Sold:</b>
+                ${Object.values(dailyProductTotals[date])
+                  .map(item => `
+                    <div>
+                      ${esc(item.name)} — ${esc(item.variant)}
+                      : ${item.quantity}
+                    </div>
+                  `).join("")
+                }
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+    `).join("");
+
+
+  // OVERALL PRODUCT REPORT
+
+  const productHTML = Object.values(productTotals)
+    .sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+    .map(item => `
+
+      <div class="item">
+
+        <b>
+          ${esc(item.name)} — ${esc(item.variant)}
+        </b>
+
+        <span class="pill">
+          Sold: ${item.quantity}
+        </span>
+
+      </div>
+
+    `).join("");
+
+
+  $("reportList").innerHTML = `
+
+    <h3>Daily Sales Reports</h3>
+
+    ${
+      dailyHTML ||
+      "কোনো sales report নেই।"
+    }
+
+    <h3 style="margin-top:20px">
+      Product-wise Sales
+    </h3>
+
+    ${
+      productHTML ||
+      "এখনো কোনো Product বিক্রির তথ্য নেই।"
+    }
+
+  `;
 }
 
 
+// ==========================================
 // OWNER: REGISTRATION REQUESTS
+// ==========================================
 
 async function renderRequests() {
 
@@ -539,47 +1079,76 @@ async function renderRequests() {
     req
       .filter(r => r.status === "pending")
       .map(r => `
+
         <div class="item">
+
           <b>${esc(r.name)}</b><br>
+
           ${esc(r.email)}
+
           <div class="row">
-            <button data-approve="${r.id}">Approve</button>
-            <button class="danger" data-reject="${r.id}">
+
+            <button data-approve="${esc(r.id)}">
+              Approve
+            </button>
+
+            <button
+              class="danger"
+              data-reject="${esc(r.id)}"
+            >
               Reject
             </button>
+
           </div>
+
         </div>
-      `)
-      .join("") || "কোনো pending request নেই।";
+
+      `).join("") ||
+      "কোনো pending request নেই।";
 
 
   // APPROVE
 
   document.querySelectorAll("[data-approve]").forEach(b => {
+
     b.addEventListener("click", async () => {
 
-      const r = req.find(x => x.id === b.dataset.approve);
+      if (profile?.role !== "owner") {
+        return notice("শুধু Owner অনুমোদন দিতে পারবেন।", "bad");
+      }
+
+      const r = req.find(
+        x => x.id === b.dataset.approve
+      );
+
       if (!r) return;
 
       try {
-        await setDoc(doc(db, "users", r.uid), {
-          name: r.name,
-          email: r.email,
-          role: "staff",
-          active: true,
-          permissions: {
-            salesRead: true,
-            salesCreate: false,
-            salesEdit: false,
-            salesDelete: false,
-            stockRead: true,
-            stockCreate: false,
-            stockEdit: false,
-            stockDelete: false,
-            reportsRead: true,
-            usersManage: false
+
+        await setDoc(
+          doc(db, "users", r.uid),
+          {
+            name: r.name,
+            email: r.email,
+            role: "staff",
+            active: true,
+
+            permissions: {
+              salesRead: true,
+              salesCreate: false,
+              salesEdit: false,
+              salesDelete: false,
+
+              stockRead: true,
+              stockCreate: false,
+              stockEdit: false,
+              stockDelete: false,
+
+              reportsRead: true,
+              usersManage: false
+            }
           }
-        });
+        );
 
         await updateDoc(
           doc(db, "registrationRequests", r.id),
@@ -590,7 +1159,11 @@ async function renderRequests() {
           }
         );
 
-        notice("ব্যবহারকারী অনুমোদিত হয়েছে।", "good");
+        notice(
+          "ব্যবহারকারী অনুমোদিত হয়েছে।",
+          "good"
+        );
+
         await renderRequests();
 
       } catch (e) {
@@ -603,11 +1176,17 @@ async function renderRequests() {
   // REJECT
 
   document.querySelectorAll("[data-reject]").forEach(b => {
+
     b.addEventListener("click", async () => {
+
+      if (profile?.role !== "owner") {
+        return notice("শুধু Owner request reject করতে পারবেন।", "bad");
+      }
 
       if (!confirm("Request reject করবে?")) return;
 
       try {
+
         await updateDoc(
           doc(db, "registrationRequests", b.dataset.reject),
           {
@@ -615,6 +1194,8 @@ async function renderRequests() {
             reviewedAt: serverTimestamp()
           }
         );
+
+        notice("Request reject করা হয়েছে।", "good");
 
         await renderRequests();
 
@@ -626,26 +1207,27 @@ async function renderRequests() {
 }
 
 
-// HTML ESCAPE
+// ==========================================
+// INITIALIZE PRODUCT PICKER
+// ==========================================
 
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[c]);
-}
+setupSaleProductPicker();
 
 
+// ==========================================
 // SERVICE WORKER
+// ==========================================
 
 if ("serviceWorker" in navigator) {
+
   window.addEventListener("load", () => {
+
     navigator.serviceWorker
       .register("./sw.js")
-      .catch(e => console.warn("Service Worker:", e));
+      .catch(e =>
+        console.warn("Service Worker:", e)
+      );
+
   });
-  }
-                       
+
+}
