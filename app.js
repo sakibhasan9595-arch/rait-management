@@ -513,13 +513,23 @@ $("saveSale")?.addEventListener("click", async () => {
     if (!val("sDate")) {
       return notice("Sales date নির্বাচন করো।", "bad");
     }
+const hasAmount = [
+  "sOrder",
+  "sB2C",
+  "sDelivery",
+  "sCash",
+  "sCredit",
+  "sDue",
+  "sTotal",
+  "sCancel"
+].some(id => num(id) > 0);
 
-    if (!saleDraftItems.length) {
-      return notice(
-        "কমপক্ষে একটি Product ও Quantity যোগ করো।",
-        "bad"
-      );
-    }
+if (!saleDraftItems.length && !hasAmount) {
+  return notice(
+    "কমপক্ষে একটি Amount অথবা Product Entry দিতে হবে।",
+    "bad"
+  );
+}
 
     // CHECK STOCK
 
@@ -917,26 +927,37 @@ function renderReports() {
     // DAILY TOTALS
 
     groups[date] ??= {
-      count: 0,
-      order: 0,
-      b2c: 0,
-      collection: 0,
-      cancelled: 0
-    };
+  count: 0,
+  order: 0,
+  b2c: 0,
+  delivery: 0,
+  cash: 0,
+  credit: 0,
+  dueCollection: 0,
+  collection: 0,
+  cancelled: 0,
+  shopCount: 0
+};
 
-    groups[date].count++;
+groups[date].count++;
 
-    groups[date].order +=
-      Number(sale.order || 0);
+[
+  "order",
+  "b2c",
+  "delivery",
+  "cash",
+  "credit",
+  "dueCollection",
+  "totalCollection",
+  "cancelled",
+  "shopCount"
+].forEach(key => {
+  const reportKey =
+    key === "totalCollection" ? "collection" : key;
 
-    groups[date].b2c +=
-      Number(sale.b2c || 0);
-
-    groups[date].collection +=
-      Number(sale.totalCollection || 0);
-
-    groups[date].cancelled +=
-      Number(sale.cancelled || 0);
+  groups[date][reportKey] +=
+    Number(sale[key] || 0);
+});
 
 
     // PRODUCT TOTALS
@@ -989,11 +1010,21 @@ function renderReports() {
 
         Order: ${money(x.order)}<br>
 
-        B2C: ${money(x.b2c)}<br>
+B2C: ${money(x.b2c)}<br>
 
-        Collection: ${money(x.collection)}<br>
+Shop Count: ${x.shopCount}<br>
 
-        Cancelled: ${money(x.cancelled)}
+Delivery: ${money(x.delivery)}<br>
+
+Cash: ${money(x.cash)}<br>
+
+Credit: ${money(x.credit)}<br>
+
+Due Collection: ${money(x.dueCollection)}<br>
+
+Total Collection: ${money(x.collection)}<br>
+
+Cancelled: ${money(x.cancelled)}
 
         ${
           dailyProductTotals[date]
