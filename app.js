@@ -918,7 +918,6 @@ function renderReports() {
 
   const groups = {};
   const productTotals = {};
-  const dailyProductTotals = {};
 
   sales.forEach(sale => {
 
@@ -977,19 +976,6 @@ groups[date].count++;
       productTotals[key].quantity +=
         Number(item.quantity || 0);
 
-
-      // DATE-WISE PRODUCT TOTALS
-
-      dailyProductTotals[date] ??= {};
-
-      dailyProductTotals[date][key] ??= {
-        name: item.name || "Unknown",
-        variant: item.variant || "",
-        quantity: 0
-      };
-
-      dailyProductTotals[date][key].quantity +=
-        Number(item.quantity || 0);
 
     });
 
