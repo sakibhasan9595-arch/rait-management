@@ -233,7 +233,10 @@ $("registerBtn")?.addEventListener("click", async () => {
       }
     }
 
-    notice(friendly(e), "bad");
+    notice(
+  `Error Code: ${e.code || "unknown"} | ${e.message || e}`,
+  "bad"
+);
   }
 });
 
