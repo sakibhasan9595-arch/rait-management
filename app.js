@@ -248,6 +248,7 @@ $("pendingLogout")?.addEventListener("click", () => signOut(auth));
 
 // OWNER PROFILE / AUTH STATE
 
+
 onAuthStateChanged(auth, async user => {
   currentUser = user;
   profile = null;
@@ -263,6 +264,12 @@ onAuthStateChanged(auth, async user => {
 
   try {
     const userRef = doc(db, "users", user.uid);
+    const requestRef = doc(
+      db,
+      "registrationRequests",
+      user.uid
+    );
+
     const snap = await getDoc(userRef);
 
     const diagnostic = {
@@ -274,17 +281,60 @@ onAuthStateChanged(auth, async user => {
 
     console.info("Rait profile check:", diagnostic);
 
+    // PROFILE NOT FOUND
     if (!snap.exists()) {
+
+      let requestSnap = null;
+
+      // Registration transaction may still be processing.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        requestSnap = await getDoc(requestRef);
+
+        if (requestSnap.exists()) {
+          break;
+        }
+
+        await new Promise(resolve =>
+          setTimeout(resolve, 700)
+        );
+      }
+
+      if (requestSnap && requestSnap.exists()) {
+        const request = requestSnap.data();
+
+        console.info(
+          "Rait registration status:",
+          request.status
+        );
+
+        show("pendingView");
+
+        if (request.status === "rejected") {
+          notice(
+            "তোমার Registration Request প্রত্যাখ্যান করা হয়েছে। Owner-এর সঙ্গে যোগাযোগ করো।",
+            "bad"
+          );
+        }
+
+        return;
+      }
+
+      console.error(
+        "Profile and registration request both missing:",
+        diagnostic
+      );
+
       show("pendingView");
 
       notice(
-        "Profile document পাওয়া যায়নি। Auth UID: " + user.uid,
+        "Profile ও Registration Request পাওয়া যায়নি। UID: " + user.uid,
         "bad"
       );
 
       return;
     }
 
+    // PROFILE FOUND
     profile = snap.data();
 
     diagnostic.role = profile.role;
@@ -298,7 +348,7 @@ onAuthStateChanged(auth, async user => {
       show("pendingView");
 
       notice(
-        `Approval সমস্যা: active=${String(profile.active)} (${typeof profile.active}), role=${String(profile.role)}, UID: ${user.uid}`,
+        `Approval সমস্যা: active=${String(profile.active)}, role=${String(profile.role)}, UID: ${user.uid}`,
         "bad"
       );
 
@@ -329,8 +379,9 @@ onAuthStateChanged(auth, async user => {
 
     await refreshAll();
 
-    } catch (e) {
+  } catch (e) {
     console.error("Profile load failed:", e);
+
     show("pendingView");
 
     notice(
@@ -339,6 +390,7 @@ onAuthStateChanged(auth, async user => {
     );
   }
 });
+
 
 
 // TAB NAVIGATION
