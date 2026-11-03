@@ -420,11 +420,13 @@ document.querySelectorAll("[data-tab]").forEach(b => {
     }
 
     [
-      "salesPanel",
-      "stockPanel",
-      "reportsPanel",
-      "usersPanel"
-    ].forEach(hide);
+  "salesPanel",
+  "stockPanel",
+  "reportsPanel",
+  "myProfilePanel",
+  "membersPanel",
+  "usersPanel"
+].forEach(hide);
 
     show(b.dataset.tab);
   });
