@@ -372,9 +372,11 @@ onAuthStateChanged(auth, async user => {
     show("appView");
 
     if (profile.role === "owner") {
-      show("usersTab");
-    } else {
-      hide("usersTab");
+  show("usersTab");
+  show("usersPanel");
+} else {
+  hide("usersTab");
+  hide("usersPanel");
     }
 
     await refreshAll();
@@ -393,10 +395,21 @@ onAuthStateChanged(auth, async user => {
 
 
 
+
 // TAB NAVIGATION
 
 document.querySelectorAll("[data-tab]").forEach(b => {
   b.addEventListener("click", () => {
+
+    // Only Owner can access User Approval
+    if (
+      b.dataset.tab === "usersPanel" &&
+      profile?.role !== "owner"
+    ) {
+      hide("usersPanel");
+      return;
+    }
+
     [
       "salesPanel",
       "stockPanel",
@@ -407,6 +420,7 @@ document.querySelectorAll("[data-tab]").forEach(b => {
     show(b.dataset.tab);
   });
 });
+
 
 
 // DATABASE READ
