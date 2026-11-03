@@ -614,8 +614,116 @@ async function refreshAll() {
   if (profile?.role === "owner") {
     await renderRequests();
   }
+
+  await renderMembers();
 }
 
+
+// ==========================================
+// MEMBERS DIRECTORY
+// ==========================================
+
+async function renderMembers() {
+
+  const membersList = $("membersList");
+  const memberSearch = $("memberSearch");
+
+  if (!membersList || !memberSearch) return;
+
+  membersList.textContent = "Members Loading...";
+
+  try {
+
+    const users = await readCol("users");
+
+    const activeMembers = users.filter(
+      u => u.active === true
+    );
+
+    function displayMembers(searchText = "") {
+
+      const query = String(searchText).toLowerCase().trim();
+
+      const filtered = activeMembers.filter(u => {
+
+        const name = String(u.name || "").toLowerCase();
+        const username = String(u.username || "").toLowerCase();
+
+        return (
+          name.includes(query) ||
+          username.includes(query)
+        );
+
+      });
+
+      membersList.innerHTML = filtered.map(u => {
+
+        const photoURL =
+          typeof u.photoURL === "string" &&
+          /^https:\/\/res\.cloudinary\.com\/[a-zA-Z0-9_-]+\/image\/upload\//.test(u.photoURL)
+            ? u.photoURL
+            : "";
+
+        return `
+
+          <div class="item">
+
+            <div style="display:flex;align-items:center;gap:12px;">
+
+              <div style="width:55px;height:55px;min-width:55px;border-radius:50%;overflow:hidden;background:#eaf2f8;display:flex;align-items:center;justify-content:center;">
+
+                ${
+                  photoURL
+                    ? `<img src="${esc(photoURL)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`
+                    : `<span style="font-size:25px;">👤</span>`
+                }
+
+              </div>
+
+              <div style="min-width:0;">
+
+                <b>${esc(u.name || "Name not set")}</b><br>
+
+                <span class="muted">@${esc(u.username || "No username")}</span>
+
+              </div>
+
+            </div>
+
+            <div style="margin-top:10px;">
+
+              <div><b>Email:</b> ${esc(u.email || "—")}</div>
+              <div><b>Phone:</b> ${esc(u.phone || "—")}</div>
+              <div><b>Position:</b> ${esc(u.position || "—")}</div>
+              <div><b>Role:</b> ${esc(u.role || "—")}</div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join("") || "কোনো Member পাওয়া যায়নি।";
+
+    }
+
+    memberSearch.oninput = () => {
+      displayMembers(memberSearch.value);
+    };
+
+    displayMembers(memberSearch.value);
+
+  } catch (e) {
+
+    console.error("Members load failed:", e);
+
+    membersList.textContent = "Members Load করা যায়নি।";
+
+    notice(friendly(e), "bad");
+
+  }
+
+}
 
 // ==========================================
 // PRODUCT SELECTOR IN SALES ENTRY
