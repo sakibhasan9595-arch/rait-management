@@ -436,6 +436,121 @@ if (profile.photoURL) {
 
 
 
+// ==========================================
+// MY PROFILE: SAVE NAME AND PHONE
+// ==========================================
+
+$("saveProfileBtn").addEventListener("click", async () => {
+
+  if (!currentUser || !profile) return;
+
+  const name = $("profileName").value.trim();
+  const phone = $("profilePhone").value.trim();
+
+  if (!name) {
+    return notice("নাম লিখুন।", "bad");
+  }
+
+  try {
+
+    await updateDoc(
+      doc(db, "users", currentUser.uid),
+      {
+        name: name,
+        phone: phone,
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    profile.name = name;
+    profile.phone = phone;
+
+    $("welcome").textContent = name;
+
+    notice("Profile সফলভাবে Update হয়েছে।", "good");
+
+  } catch (e) {
+    console.error("Profile update failed:", e);
+    notice(friendly(e), "bad");
+  }
+
+});
+
+
+// ==========================================
+// MY PROFILE: CLOUDINARY PHOTO UPLOAD
+// ==========================================
+
+$("profilePhotoInput").addEventListener("change", async () => {
+
+  if (!currentUser || !profile) return;
+
+  const file = $("profilePhotoInput").files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    return notice("শুধু Image Upload করা যাবে।", "bad");
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return notice("ছবির সাইজ 5 MB-এর কম হতে হবে।", "bad");
+  }
+
+  try {
+
+    notice("ছবি Upload হচ্ছে...", "good");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "rait_profile_photos");
+
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/ijf3buns/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error?.message || "Cloudinary Upload failed");
+    }
+
+    const photoURL = result.secure_url;
+
+    await updateDoc(
+      doc(db, "users", currentUser.uid),
+      {
+        photoURL: photoURL,
+        updatedAt: serverTimestamp()
+      }
+    );
+
+    profile.photoURL = photoURL;
+
+    $("myProfilePhoto").src = photoURL;
+    $("myProfilePhoto").classList.remove("hidden");
+    $("myProfilePhotoFallback").classList.add("hidden");
+
+    $("headerPhoto").src = photoURL;
+    $("headerPhoto").classList.remove("hidden");
+    $("headerPhotoFallback").classList.add("hidden");
+
+    notice("Profile Photo সফলভাবে Update হয়েছে।", "good");
+
+  } catch (e) {
+    console.error("Profile photo upload failed:", e);
+    notice("Photo Upload Error: " + e.message, "bad");
+  }
+
+  $("profilePhotoInput").value = "";
+
+});
+    
+
 
 // TAB NAVIGATION
 
