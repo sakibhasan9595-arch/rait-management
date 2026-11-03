@@ -728,7 +728,7 @@ async function renderMembers() {
           font-size:11px;
           font-weight:700;
         ">
-          ● Active
+                    ● Active
         </span>
 
       </div>
@@ -748,9 +748,9 @@ async function renderMembers() {
     ">
 
       <div style="min-width:0;">
-        <div style="font-size:10px;color:#888;font-weight:700;">EMAIL</div>
-        <div style="font-size:12px;color:#222;margin-top:4px;overflow-wrap:anywhere;">
-          ${esc(u.email || "—")}
+        <div style="font-size:10px;color:#888;font-weight:700;">POSITION</div>
+        <div style="font-size:12px;color:#222;margin-top:4px;">
+          ${esc(u.position || "—")}
         </div>
       </div>
 
@@ -761,20 +761,17 @@ async function renderMembers() {
         </div>
       </div>
 
-      <div style="min-width:0;">
-        <div style="font-size:10px;color:#888;font-weight:700;">POSITION</div>
-        <div style="font-size:12px;color:#222;margin-top:4px;">
-          ${esc(u.position || "—")}
-        </div>
-      </div>
+    </div>
 
-      <div style="min-width:0;">
-        <div style="font-size:10px;color:#888;font-weight:700;">ROLE</div>
-        <div style="font-size:12px;color:#222;margin-top:4px;">
-          ${esc(u.role || "—")}
-        </div>
+    <div style="
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid #eeeeee;
+    ">
+      <div style="font-size:10px;color:#888;font-weight:700;">EMAIL</div>
+      <div style="font-size:12px;color:#222;margin-top:4px;overflow-wrap:anywhere;">
+        ${esc(u.email || "—")}
       </div>
-
     </div>
 
   </div>
