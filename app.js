@@ -6,7 +6,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  signOut
+  signOut,
+  deleteUser
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 import {
@@ -20,6 +21,7 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  runTransaction,
   enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -148,15 +150,25 @@ $("loginBtn")?.addEventListener("click", async () => {
 
 $("registerBtn")?.addEventListener("click", async () => {
   const name = val("regName").trim();
+  const username = val("regUsername").trim().toLowerCase();
   const email = val("regEmail").trim();
   const pass = val("regPass");
 
-  if (!name || !email || pass.length < 6) {
+  if (!name || !username || !email || pass.length < 6) {
     return notice(
-      "নাম, ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দাও।",
+      "নাম, Username, Email ও কমপক্ষে ৬ অক্ষরের Password দাও।",
       "bad"
     );
   }
+
+  if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+    return notice(
+      "Username ৩-৩০ অক্ষরের হতে হবে। শুধু ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও underscore (_) ব্যবহার করো।",
+      "bad"
+    );
+  }
+
+  let newUser = null;
 
   try {
     const cred = await createUserWithEmailAndPassword(
@@ -165,24 +177,65 @@ $("registerBtn")?.addEventListener("click", async () => {
       pass
     );
 
-    await setDoc(
-      doc(db, "registrationRequests", cred.user.uid),
-      {
+    newUser = cred.user;
+
+    const usernameRef = doc(db, "usernameClaims", username);
+
+    const requestRef = doc(
+      db,
+      "registrationRequests",
+      cred.user.uid
+    );
+
+    await runTransaction(db, async transaction => {
+      const usernameSnap = await transaction.get(usernameRef);
+
+      if (usernameSnap.exists()) {
+        throw new Error(
+          "এই Username ইতিমধ্যে ব্যবহৃত হচ্ছে। অন্য Username দাও।"
+        );
+      }
+
+      transaction.set(usernameRef, {
+        uid: cred.user.uid,
+        username,
+        createdAt: serverTimestamp()
+      });
+
+      transaction.set(requestRef, {
         uid: cred.user.uid,
         name,
+        username,
         email,
         status: "pending",
         createdAt: serverTimestamp()
-      }
+      });
+    });
+
+    newUser = null;
+
+    notice(
+      "Registration request পাঠানো হয়েছে। Admin Approval-এর জন্য অপেক্ষা করো।",
+      "good"
     );
 
-    notice("Registration request পাঠানো হয়েছে।", "good");
-
   } catch (e) {
+    console.error("Registration failed:", e);
+
+    if (newUser) {
+      try {
+        await deleteUser(newUser);
+      } catch (deleteError) {
+        console.error(
+          "Temporary account cleanup failed:",
+          deleteError
+        );
+      }
+    }
+
     notice(friendly(e), "bad");
   }
 });
-
 
 // LOGOUT
 
