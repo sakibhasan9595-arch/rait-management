@@ -84,16 +84,32 @@ label{font-size:13px;color:var(--muted)}
 
 <section id="appView" class="hidden">
 
+    <!-- USER PROFILE HEADER -->
+
   <div class="card">
-    <div class="row">
-      <div>
+    <div style="display:flex;align-items:center;gap:12px;">
+
+      <div style="width:58px;height:58px;min-width:58px;border-radius:50%;overflow:hidden;background:#eaf2f8;display:flex;align-items:center;justify-content:center;">
+        <img
+          id="headerPhoto"
+          class="hidden"
+          alt="Profile Photo"
+          style="width:100%;height:100%;object-fit:cover;"
+        >
+        <span id="headerPhotoFallback" style="font-size:25px;">👤</span>
+      </div>
+
+      <div style="min-width:0;">
         <strong id="welcome"></strong>
+        <div class="muted" id="headerUsername"></div>
         <div class="muted" id="roleText"></div>
       </div>
-      <div>
-        <button id="logoutBtn" class="secondary">Logout</button>
-      </div>
+
     </div>
+
+    <button id="logoutBtn" class="secondary" style="margin-top:14px;">
+      Logout
+    </button>
   </div>
 
   <div class="tabs">
