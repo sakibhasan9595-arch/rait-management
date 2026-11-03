@@ -624,6 +624,7 @@ async function refreshAll() {
 // ==========================================
 
 async function renderMembers() {
+  console.log("RENDER MEMBERS CALLED");
 
   const membersList = $("membersList");
   const memberSearch = $("memberSearch");
