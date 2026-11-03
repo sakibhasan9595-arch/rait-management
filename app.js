@@ -665,43 +665,120 @@ async function renderMembers() {
             : "";
 
         return `
+  <div class="item" style="
+    background:#ffffff;
+    border:1px solid #e2e6e9;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.045);
+  ">
 
-          <div class="item">
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:13px;
+    ">
 
-            <div style="display:flex;align-items:center;gap:12px;">
+      <div style="
+        width:62px;
+        height:62px;
+        min-width:62px;
+        border-radius:50%;
+        overflow:hidden;
+        background:#edf1f4;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:2px solid #e2e6e9;
+      ">
+        ${
+          photoURL
+            ? `<img src="${esc(photoURL)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`
+            : `<span style="font-size:27px;">👤</span>`
+        }
+      </div>
 
-              <div style="width:55px;height:55px;min-width:55px;border-radius:50%;overflow:hidden;background:#eaf2f8;display:flex;align-items:center;justify-content:center;">
+      <div style="flex:1;min-width:0;">
 
-                ${
-                  photoURL
-                    ? `<img src="${esc(photoURL)}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`
-                    : `<span style="font-size:25px;">👤</span>`
-                }
+        <div style="
+          font-size:16px;
+          font-weight:700;
+          color:#171717;
+          overflow-wrap:anywhere;
+        ">
+          ${esc(u.name || "Name not set")}
+        </div>
 
-              </div>
+        <div style="
+          font-size:13px;
+          color:#737373;
+          margin-top:3px;
+        ">
+          @${esc(u.username || "No username")}
+        </div>
 
-              <div style="min-width:0;">
+        <span style="
+          display:inline-block;
+          margin-top:7px;
+          padding:4px 10px;
+          border-radius:20px;
+          background:#e8f5ec;
+          color:#24743b;
+          font-size:11px;
+          font-weight:700;
+        ">
+          ● Active
+        </span>
 
-                <b>${esc(u.name || "Name not set")}</b><br>
+      </div>
 
-                <span class="muted">@${esc(u.username || "No username")}</span>
+    </div>
 
-              </div>
+    <div style="
+      height:1px;
+      background:#eeeeee;
+      margin:15px 0;
+    "></div>
 
-            </div>
+    <div style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px 10px;
+    ">
 
-            <div style="margin-top:10px;">
+      <div style="min-width:0;">
+        <div style="font-size:10px;color:#888;font-weight:700;">EMAIL</div>
+        <div style="font-size:12px;color:#222;margin-top:4px;overflow-wrap:anywhere;">
+          ${esc(u.email || "—")}
+        </div>
+      </div>
 
-              <div><b>Email:</b> ${esc(u.email || "—")}</div>
-              <div><b>Phone:</b> ${esc(u.phone || "—")}</div>
-              <div><b>Position:</b> ${esc(u.position || "—")}</div>
-              <div><b>Role:</b> ${esc(u.role || "—")}</div>
+      <div style="min-width:0;">
+        <div style="font-size:10px;color:#888;font-weight:700;">PHONE</div>
+        <div style="font-size:12px;color:#222;margin-top:4px;overflow-wrap:anywhere;">
+          ${esc(u.phone || "—")}
+        </div>
+      </div>
 
-            </div>
+      <div style="min-width:0;">
+        <div style="font-size:10px;color:#888;font-weight:700;">POSITION</div>
+        <div style="font-size:12px;color:#222;margin-top:4px;">
+          ${esc(u.position || "—")}
+        </div>
+      </div>
 
-          </div>
+      <div style="min-width:0;">
+        <div style="font-size:10px;color:#888;font-weight:700;">ROLE</div>
+        <div style="font-size:12px;color:#222;margin-top:4px;">
+          ${esc(u.role || "—")}
+        </div>
+      </div>
 
-        `;
+    </div>
+
+  </div>
+`;
 
       }).join("") || "কোনো Member পাওয়া যায়নি।";
 
