@@ -329,10 +329,14 @@ onAuthStateChanged(auth, async user => {
 
     await refreshAll();
 
-  } catch (e) {
+    } catch (e) {
     console.error("Profile load failed:", e);
     show("pendingView");
-    notice("Profile পরীক্ষা ব্যর্থ: " + friendly(e), "bad");
+
+    notice(
+      `Profile Error: ${e.code || "unknown"} | ${e.message || e}`,
+      "bad"
+    );
   }
 });
 
