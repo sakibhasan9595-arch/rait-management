@@ -1515,6 +1515,7 @@ async function renderRequests() {
           doc(db, "users", r.uid),
           {
             name: r.name,
+            username: r.username,
             email: r.email,
             role: "staff",
             active: true,
