@@ -182,6 +182,49 @@ label{font-size:13px;color:var(--muted)}
     <div id="reportList"></div>
   </section>
 
+    <!-- MY PROFILE -->
+
+  <section id="myProfilePanel" class="card hidden">
+    <h2>My Profile</h2>
+
+    <div style="text-align:center;margin:15px 0;">
+      <div style="width:100px;height:100px;border-radius:50%;overflow:hidden;background:#eaf2f8;margin:auto;display:flex;align-items:center;justify-content:center;">
+        <img
+          id="myProfilePhoto"
+          class="hidden"
+          alt="Profile Photo"
+          style="width:100%;height:100%;object-fit:cover;"
+        >
+        <span id="myProfilePhotoFallback" style="font-size:38px;">👤</span>
+      </div>
+
+      <label for="profilePhotoInput">Change Profile Photo</label>
+      <input id="profilePhotoInput" type="file" accept="image/*">
+    </div>
+
+    <label>Name</label>
+    <input id="profileName" type="text" placeholder="Your Name">
+
+    <label>Username</label>
+    <input id="profileUsername" type="text" readonly>
+
+    <label>Email</label>
+    <input id="profileEmail" type="email" readonly>
+
+    <label>Phone Number</label>
+    <input id="profilePhone" type="tel" placeholder="Your Phone Number">
+
+    <label>Position</label>
+    <input id="profilePosition" type="text" readonly>
+
+    <label>Role</label>
+    <input id="profileRole" type="text" readonly>
+
+    <button id="saveProfileBtn">Save Profile Changes</button>
+
+    <div id="profileNotice"></div>
+  </section>
+
   <!-- USER APPROVAL -->
 
   <section id="usersPanel" class="card hidden">
