@@ -336,6 +336,38 @@ onAuthStateChanged(auth, async user => {
 
     // PROFILE FOUND
     profile = snap.data();
+  
+    // LOAD MY PROFILE DATA
+
+$("profileName").value = profile.name || "";
+
+$("profileUsername").value =
+  profile.username || "";
+
+$("profileEmail").value =
+  profile.email || user.email || "";
+
+$("profilePhone").value =
+  profile.phone || "";
+
+$("profilePosition").value =
+  profile.position || "";
+
+$("profileRole").value =
+  profile.role === "owner"
+    ? "Owner / Super Admin"
+    : "Approved Staff";
+
+// MY PROFILE PHOTO
+
+if (profile.photoURL) {
+  $("myProfilePhoto").src = profile.photoURL;
+  $("myProfilePhoto").classList.remove("hidden");
+  $("myProfilePhotoFallback").classList.add("hidden");
+} else {
+  $("myProfilePhoto").classList.add("hidden");
+  $("myProfilePhotoFallback").classList.remove("hidden");
+}
 
     diagnostic.role = profile.role;
     diagnostic.active = profile.active;
