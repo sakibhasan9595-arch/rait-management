@@ -361,13 +361,22 @@ onAuthStateChanged(auth, async user => {
       );
     }
 
-    $("welcome").textContent =
-      profile.name || user.email;
+$("welcome").textContent = profile.name || user.email;
 
-    $("roleText").textContent =
-      profile.role === "owner"
-        ? "Owner / Super Admin"
-        : "Approved Staff";
+$("headerUsername").textContent =
+  "@" + (profile.username || "Username not set");
+
+$("roleText").textContent =
+  profile.role === "owner" ? "Owner / Super Admin" : "Approved Staff";
+
+if (profile.photoURL) {
+  $("headerPhoto").src = profile.photoURL;
+  $("headerPhoto").classList.remove("hidden");
+  $("headerPhotoFallback").classList.add("hidden");
+} else {
+  $("headerPhoto").classList.add("hidden");
+  $("headerPhotoFallback").classList.remove("hidden");
+}
 
     show("appView");
 
