@@ -117,6 +117,7 @@ let profile = null;
 let products = [];
 let sales = [];
 let restocks = [];
+let members = [];
 
 let saleDraftItems = [];
 
@@ -634,10 +635,11 @@ async function renderMembers() {
 
   try {
 
-    const users = await readCol("users");
+    members = await readCol("users");
 
-    const activeMembers = users.filter(
-      u => u.active === true
+    const activeMembers = members.filter(
+  u => u.active === true
+);
     );
 
     function displayMembers(searchText = "") {
