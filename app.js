@@ -598,6 +598,9 @@ async function readCol(name) {
 
 async function refreshAll() {
 
+  // Load members first for creator information
+  await renderMembers();
+
   if (perms("salesRead")) {
     sales = await readCol("sales");
     renderSales();
@@ -615,8 +618,6 @@ async function refreshAll() {
   if (profile?.role === "owner") {
     await renderRequests();
   }
-
-  await renderMembers();
 }
 
 
@@ -1133,6 +1134,38 @@ function getSaleItems(sale) {
 }
 
 
+// CREATOR & ENTRY TIME
+
+function getEntryCreator(uid) {
+  const user = members.find(u => u.id === uid);
+
+  if (!user) return "Unknown User";
+
+  return user.username
+    ? `@${user.username}`
+    : (user.email || "Unknown User");
+}
+
+function formatEntryTime(timestamp) {
+  if (!timestamp) return "Time unavailable";
+
+  const date = timestamp.toDate
+    ? timestamp.toDate()
+    : new Date(timestamp);
+
+  if (isNaN(date.getTime())) return "Time unavailable";
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+}
+
+
 // ==========================================
 // SALES LIST
 // ==========================================
@@ -1163,8 +1196,14 @@ function renderSales() {
 
             <b>${esc(s.date || "")}</b>
 
-            · Order ${money(s.order)}
-            · Collection ${money(s.totalCollection)}
+· Order ${money(s.order)}
+· Collection ${money(s.totalCollection)}
+
+<div style="margin-top:8px;font-size:12px;color:#647484;">
+  Added by: ${esc(getEntryCreator(s.createdBy))}
+  <br>
+  Entry Time: ${esc(formatEntryTime(s.createdAt))}
+</div>
 
             ${
               itemText
@@ -1422,11 +1461,17 @@ function renderProducts() {
                   <div style="margin-top:12px">
                     <b>Restock History</b>
                     ${productRestocks.map(r => `
-                      <div class="item">
+  <div class="item">
 
-                        Date: ${esc(r.date || "")}
-                        <br>
-                        Quantity: ${Number(r.quantity || 0)}
+    Date: ${esc(r.date || "")}
+    <br>
+    Quantity: ${Number(r.quantity || 0)}
+
+    <div style="margin-top:8px;font-size:12px;color:#647484;">
+      Added by: ${esc(getEntryCreator(r.createdBy))}
+      <br>
+      Entry Time: ${esc(formatEntryTime(r.createdAt))}
+    </div>
 
                         ${
                           perms("stockEdit")
