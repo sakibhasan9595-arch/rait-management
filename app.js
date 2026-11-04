@@ -641,7 +641,6 @@ async function renderMembers() {
     const activeMembers = members.filter(
   u => u.active === true
 );
-    );
 
     function displayMembers(searchText = "") {
 
