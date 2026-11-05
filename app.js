@@ -1150,6 +1150,34 @@ function getSaleItems(sale) {
 
 function renderHome() {
 
+  // WELCOME HEADER
+
+  const now = new Date();
+  const hour = now.getHours();
+
+  let greeting = "Good Evening";
+
+  if (hour < 12) {
+    greeting = "Good Morning";
+  } else if (hour < 17) {
+    greeting = "Good Afternoon";
+  }
+
+  $("homeGreeting").textContent =
+    `${greeting}, ${profile?.name || "User"}!`;
+
+  $("homeDay").textContent =
+    now.toLocaleDateString("en-GB", {
+      weekday: "long"
+    });
+
+  $("homeDate").textContent =
+    now.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  
   // CURRENT STOCK SUMMARY
 
   const totalStock = products.reduce(
