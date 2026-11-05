@@ -415,11 +415,12 @@ if (profile.photoURL) {
 
     if (profile.role === "owner") {
   show("usersTab");
-  show("usersPanel");
 } else {
   hide("usersTab");
-  hide("usersPanel");
-    }
+}
+
+hide("usersPanel");
+show("homePanel");
 
     await refreshAll();
 
@@ -568,6 +569,7 @@ document.querySelectorAll("[data-tab]").forEach(b => {
     }
 
     [
+  "homePanel",
   "salesPanel",
   "stockPanel",
   "reportsPanel",
