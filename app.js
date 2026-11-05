@@ -582,7 +582,15 @@ document.querySelectorAll("[data-tab]").forEach(b => {
   });
 });
 
+// HOME DASHBOARD NAVIGATION
 
+$("openStockFromHome")?.addEventListener("click", () => {
+  document.querySelector('[data-tab="stockPanel"]')?.click();
+});
+
+$("openReportsFromHome")?.addEventListener("click", () => {
+  document.querySelector('[data-tab="reportsPanel"]')?.click();
+});
 
 // DATABASE READ
 
@@ -620,6 +628,7 @@ async function refreshAll() {
   if (profile?.role === "owner") {
     await renderRequests();
   }
+  renderHome();
 }
 
 
@@ -1132,6 +1141,60 @@ function getSaleItems(sale) {
   });
 
   return items;
+}
+
+
+// ==========================================
+// HOME DASHBOARD
+// ==========================================
+
+function renderHome() {
+
+  // CURRENT STOCK SUMMARY
+
+  const totalStock = products.reduce(
+    (sum, p) => sum + remaining(p),
+    0
+  );
+
+  $("homeStockTotal").textContent =
+    totalStock.toLocaleString() + " Units";
+
+  $("homeStockDetails").textContent =
+    products.length + " Products";
+
+
+  // TODAY'S SALES SUMMARY
+
+  const todaySales = sales.filter(
+    sale => sale.date === today()
+  );
+
+  const todayOrder = todaySales.reduce(
+    (sum, sale) => sum + Number(sale.order || 0),
+    0
+  );
+
+  const todayCollection = todaySales.reduce(
+    (sum, sale) =>
+      sum + Number(sale.totalCollection || 0),
+    0
+  );
+
+  const todayQuantity = todaySales.reduce(
+    (sum, sale) =>
+      sum + getSaleItems(sale).reduce(
+        (total, item) =>
+          total + Number(item.quantity || 0),
+        0
+      ),
+    0
+  );
+
+  $("homeSalesTotal").textContent = money(todayOrder);
+
+  $("homeSalesDetails").textContent =
+    `Collection: ${money(todayCollection)} | ${todaySales.length} Entries | ${todayQuantity} Pcs Sold`;
 }
 
 
