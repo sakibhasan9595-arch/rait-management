@@ -33,6 +33,38 @@ button.danger{background:#a52d36}
 .good{background:#e8f6ee;color:#145b32}
 .bad{background:#fdecee;color:#8a1e2b}
 label{font-size:13px;color:var(--muted)}
+.home-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.home-tile{
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:14px 10px;
+  background:#fff;
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:12px;
+  text-align:left;
+  box-shadow:0 2px 8px #142c4210;
+}
+.home-tile h3{
+  color:var(--navy);
+  font-size:14px;
+  margin:0 0 10px;
+}
+.home-tile .home-metric{
+  font-size:22px;
+  font-weight:750;
+  color:var(--navy);
+}
+.home-tile .muted{
+  margin-top:7px;
+  font-size:11px;
+  }
 </style>
 </head>
 
@@ -139,13 +171,38 @@ label{font-size:13px;color:var(--muted)}
   </div>
 
     <div class="tabs">
-    <button data-tab="salesPanel">Sales</button>
-    <button data-tab="stockPanel">Stock</button>
-    <button data-tab="reportsPanel">Reports</button>
-    <button data-tab="myProfilePanel">My Profile</button>
-    <button data-tab="membersPanel">Members</button>
-    <button data-tab="usersPanel" id="usersTab" class="hidden">User Approval</button>
+  <button data-tab="homePanel">Home</button>
+  <button data-tab="salesPanel">Sales</button>
+  <button data-tab="stockPanel">Stock</button>
+  <button data-tab="reportsPanel">Reports</button>
+  <button data-tab="myProfilePanel">My Profile</button>
+  <button data-tab="membersPanel">Members</button>
+  <button data-tab="usersPanel" id="usersTab" class="hidden">User Approval</button>
     </div>
+
+  <!-- HOME DASHBOARD -->
+
+<section id="homePanel" class="card hidden">
+  <h2>Home Dashboard</h2>
+
+  <div class="home-grid">
+
+    <button type="button" class="home-tile" id="openStockFromHome">
+      <h3>Current Stock Summary</h3>
+      <div class="home-metric" id="homeStockTotal">—</div>
+      <div class="muted" id="homeStockDetails">Loading stock...</div>
+      <div class="muted">Tap to view Stock →</div>
+    </button>
+
+    <button type="button" class="home-tile" id="openReportsFromHome">
+      <h3>Today's Daily Sales Report</h3>
+      <div class="home-metric" id="homeSalesTotal">—</div>
+      <div class="muted" id="homeSalesDetails">Loading sales...</div>
+      <div class="muted">Tap to view Reports →</div>
+    </button>
+
+  </div>
+</section>
 
   <!-- SALES -->
 
