@@ -1916,9 +1916,12 @@ async function renderRequests() {
 
           <div class="row">
 
-            <button data-approve="${esc(r.id)}">
-              Approve
-            </button>
+            <button
+  class="approve-btn"
+  data-approve="${esc(r.id)}"
+>
+  Approve
+</button>
 
             <button
               class="danger"
