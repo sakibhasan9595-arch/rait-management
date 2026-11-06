@@ -3,8 +3,8 @@
   "short_name": "Rait",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f7fa",
-  "theme_color": "#173b5e",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
   {
     "src": "./IMG_20261102_022233.png",
