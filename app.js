@@ -556,31 +556,98 @@ $("profilePhotoInput").addEventListener("change", async () => {
 
 // TAB NAVIGATION
 
-document.querySelectorAll("[data-tab]").forEach(b => {
-  b.addEventListener("click", () => {
+(() => {
 
-    // Only Owner can access User Approval
-    if (
-      b.dataset.tab === "usersPanel" &&
-      profile?.role !== "owner"
-    ) {
-      hide("usersPanel");
-      return;
+  const bottomNavButtons =
+    document.querySelectorAll(".bottom-nav [data-tab]");
+
+  const moreNavBtn = $("moreNavBtn");
+  const moreMenu = $("moreMenu");
+
+  function closeMoreMenu() {
+    moreMenu?.classList.add("hidden");
+    moreNavBtn?.setAttribute("aria-expanded", "false");
+  }
+
+  // Main and More menu navigation
+  bottomNavButtons.forEach(b => {
+
+    b.addEventListener("click", () => {
+
+      // Only Owner can access User Approval
+      if (
+        b.dataset.tab === "usersPanel" &&
+        profile?.role !== "owner"
+      ) {
+        hide("usersPanel");
+        closeMoreMenu();
+        return;
+      }
+
+      // Hide all panels
+      [
+        "homePanel",
+        "salesPanel",
+        "stockPanel",
+        "reportsPanel",
+        "myProfilePanel",
+        "membersPanel",
+        "usersPanel"
+      ].forEach(hide);
+
+      // Show selected panel
+      show(b.dataset.tab);
+
+      // Update active navigation
+      document.querySelectorAll(".nav-item")
+        .forEach(item => item.classList.remove("active"));
+
+      if (b.closest(".more-menu")) {
+        moreNavBtn?.classList.add("active");
+      } else {
+        b.classList.add("active");
+      }
+
+      // Close More menu after selection
+      closeMoreMenu();
+
+    });
+
+  });
+
+  // More menu open / close
+  moreNavBtn?.addEventListener("click", () => {
+
+    const isOpen = !moreMenu?.classList.contains("hidden");
+
+    if (isOpen) {
+      closeMoreMenu();
+    } else {
+      moreMenu?.classList.remove("hidden");
+      moreNavBtn.setAttribute("aria-expanded", "true");
     }
 
-    [
-  "homePanel",
-  "salesPanel",
-  "stockPanel",
-  "reportsPanel",
-  "myProfilePanel",
-  "membersPanel",
-  "usersPanel"
-].forEach(hide);
-
-    show(b.dataset.tab);
   });
-});
+
+  // Close menu when clicking outside
+  document.addEventListener("click", event => {
+
+    if (!event.target.closest("#bottomNav")) {
+      closeMoreMenu();
+    }
+
+  });
+
+  // Close menu with Escape key
+  document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+      closeMoreMenu();
+    }
+
+  });
+
+})();
 
 // HOME DASHBOARD NAVIGATION
 
