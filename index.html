@@ -116,6 +116,113 @@ label{font-size:13px;color:var(--muted)}
   margin-top:7px;
   font-size:11px;
   }
+
+/* BOTTOM NAVIGATION */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:1000;
+
+  max-width:900px;
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:5px;
+
+  padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+
+  background:#ffffff;
+  border-top:1px solid #e5e5e5;
+  box-shadow:0 -3px 15px #0000000d;
+}
+
+.nav-item{
+  width:100%;
+  margin:0;
+  padding:8px 2px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+
+  background:transparent;
+  color:#888888;
+  border-radius:11px;
+  border:0;
+
+  font-size:11px;
+  font-weight:600;
+
+  transition:background .2s ease,color .2s ease;
+}
+
+.nav-icon{
+  font-size:21px;
+  line-height:1;
+}
+
+.nav-item.active{
+  background:#000000;
+  color:#ffffff;
+}
+
+/* MORE MENU */
+
+.more-menu{
+  position:absolute;
+  right:10px;
+  bottom:calc(100% + 9px);
+
+  width:190px;
+  padding:7px;
+
+  background:#ffffff;
+  border:1px solid #e5e5e5;
+  border-radius:13px;
+  box-shadow:0 5px 25px #00000018;
+}
+
+.more-menu-item{
+  width:100%;
+  margin:0;
+  padding:12px;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  background:#ffffff;
+  color:#111111;
+  border-radius:8px;
+  text-align:left;
+  font-size:13px;
+}
+
+.more-menu-item:active{
+  background:#f2f2f2;
+}
+
+/* CONTENT SPACE FOR FIXED NAV */
+
+#appView{
+  padding-bottom:90px;
+}
+
+@media(min-width:901px){
+  .bottom-nav{
+    border-left:1px solid #e5e5e5;
+    border-right:1px solid #e5e5e5;
+    border-radius:14px 14px 0 0;
+  }
+  }
+
+  
 </style>
 </head>
 
@@ -221,15 +328,57 @@ label{font-size:13px;color:var(--muted)}
     </button>
   </div>
 
-    <div class="tabs">
-  <button data-tab="homePanel">Home</button>
-  <button data-tab="salesPanel">Sales</button>
-  <button data-tab="stockPanel">Stock</button>
-  <button data-tab="reportsPanel">Reports</button>
-  <button data-tab="myProfilePanel">My Profile</button>
-  <button data-tab="membersPanel">Members</button>
-  <button data-tab="usersPanel" id="usersTab" class="hidden">User Approval</button>
-    </div>
+    <!-- BOTTOM NAVIGATION -->
+
+<nav class="bottom-nav" id="bottomNav">
+
+  <button type="button" class="nav-item active" data-tab="homePanel">
+    <span class="nav-icon">⌂</span>
+    <span>Home</span>
+  </button>
+
+  <button type="button" class="nav-item" data-tab="salesPanel">
+    <span class="nav-icon">▤</span>
+    <span>Sales</span>
+  </button>
+
+  <button type="button" class="nav-item" data-tab="stockPanel">
+    <span class="nav-icon">▣</span>
+    <span>Stock</span>
+  </button>
+
+  <button type="button" class="nav-item" data-tab="reportsPanel">
+    <span class="nav-icon">▥</span>
+    <span>Reports</span>
+  </button>
+
+  <button type="button" class="nav-item" id="moreNavBtn" aria-expanded="false">
+    <span class="nav-icon">☰</span>
+    <span>More</span>
+  </button>
+
+  <!-- MORE MENU -->
+
+  <div id="moreMenu" class="more-menu hidden">
+
+    <button type="button" class="more-menu-item" data-tab="myProfilePanel">
+      <span>👤</span>
+      <span>My Profile</span>
+    </button>
+
+    <button type="button" class="more-menu-item" data-tab="membersPanel">
+      <span>♙</span>
+      <span>Members</span>
+    </button>
+
+    <button type="button" class="more-menu-item hidden" data-tab="usersPanel" id="usersTab">
+      <span>✓</span>
+      <span>User Approval</span>
+    </button>
+
+  </div>
+
+</nav>
 
   <!-- HOME DASHBOARD -->
 
