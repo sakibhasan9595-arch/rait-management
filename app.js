@@ -1986,6 +1986,178 @@ ${
 }
 
 
+
+// ==========================================
+// DATE RANGE COMBINED REPORT
+// ==========================================
+
+function renderRangeReport(startDate, endDate) {
+
+  const output = $("rangeReportList");
+  if (!output) return;
+
+  if (!startDate || !endDate) {
+    output.innerHTML =
+      `<div class="status">দুটি Date নির্বাচন করো।</div>`;
+    return;
+  }
+
+  if (startDate > endDate) {
+    output.innerHTML =
+      `<div class="status bad">Start Date, End Date-এর পরে হতে পারবে না।</div>`;
+    return;
+  }
+
+  // Select sales within the inclusive date range
+  const selectedSales = sales.filter(sale =>
+    sale.date &&
+    sale.date >= startDate &&
+    sale.date <= endDate
+  );
+
+  if (!selectedSales.length) {
+    output.innerHTML =
+      `<div class="item">এই Date Range-এ কোনো Sales Report নেই।</div>`;
+    return;
+  }
+
+  // Combined financial and entry totals
+  const totals = {
+    count: 0,
+    order: 0,
+    b2c: 0,
+    shopCount: 0,
+    delivery: 0,
+    cash: 0,
+    credit: 0,
+    dueCollection: 0,
+    collection: 0,
+    cancelled: 0
+  };
+
+  const productTotals = {};
+
+  selectedSales.forEach(sale => {
+
+    totals.count++;
+
+    [
+      "order",
+      "b2c",
+      "shopCount",
+      "delivery",
+      "cash",
+      "credit",
+      "dueCollection",
+      "cancelled"
+    ].forEach(key => {
+      totals[key] += Number(sale[key] || 0);
+    });
+
+    totals.collection +=
+      Number(sale.totalCollection || 0);
+
+    // Combined product quantities
+    getSaleItems(sale).forEach(item => {
+
+      const key =
+        item.productId ||
+        `${item.name}-${item.variant}`;
+
+      productTotals[key] ??= {
+        name: item.name || "Unknown",
+        variant: item.variant || "",
+        quantity: 0
+      };
+
+      productTotals[key].quantity +=
+        Number(item.quantity || 0);
+
+    });
+
+  });
+
+  const productHTML = Object.values(productTotals)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(item => `
+      <div style="margin-left:10px;margin-top:5px">
+        ${esc(item.name)} — ${esc(item.variant)}:
+        <b>${item.quantity} pcs</b>
+      </div>
+    `).join("");
+
+  output.innerHTML = `
+
+    <div class="item">
+
+      <b>${esc(startDate)} থেকে ${esc(endDate)}</b>
+
+      <br><br>
+
+      <b>Combined Sales Summary</b><br>
+
+      Entries: ${totals.count}<br>
+      Order: ${money(totals.order)}<br>
+      B2C: ${money(totals.b2c)}<br>
+      Shop Count: ${totals.shopCount}<br>
+      Delivery: ${money(totals.delivery)}<br>
+      Cash: ${money(totals.cash)}<br>
+      Credit: ${money(totals.credit)}<br>
+      Due Collection: ${money(totals.dueCollection)}<br>
+      Total Collection: ${money(totals.collection)}<br>
+      Cancelled: ${money(totals.cancelled)}
+
+      <br><br>
+
+      <b>Product Sold:</b>
+
+      ${
+        productHTML ||
+        `<div class="muted">কোনো Product বিক্রি হয়নি।</div>`
+      }
+
+    </div>
+
+  `;
+    }
+    
+
+// ==========================================
+// REPORT MODE EVENT LISTENERS
+// ==========================================
+
+$("dailyModeBtn")?.addEventListener("click", () => {
+
+  $("dailyReportMode").classList.remove("hidden");
+  $("rangeReportMode").classList.add("hidden");
+
+  $("dailyModeBtn").classList.remove("secondary");
+  $("rangeModeBtn").classList.add("secondary");
+
+});
+
+$("rangeModeBtn")?.addEventListener("click", () => {
+
+  $("dailyReportMode").classList.add("hidden");
+  $("rangeReportMode").classList.remove("hidden");
+
+  $("rangeModeBtn").classList.remove("secondary");
+  $("dailyModeBtn").classList.add("secondary");
+
+});
+
+$("generateRangeReport")?.addEventListener("click", () => {
+
+  const startDate = $("reportStartDate").value;
+  const endDate = $("reportEndDate").value;
+
+  renderRangeReport(startDate, endDate);
+
+});
+
+
+
+
 // ==========================================
 // OWNER: REGISTRATION REQUESTS
 // ==========================================
