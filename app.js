@@ -1374,7 +1374,7 @@ function renderSales() {
   if (!$("salesList")) return;
 
   $("salesList").innerHTML =
-    "<h3>Recent Entries</h3>" +
+    "<h2>Recent Entries</h2>" +
 
     sales
       .slice()
