@@ -473,12 +473,52 @@ label{font-size:13px;color:var(--muted)}
 
   </section>
 
-  <!-- REPORTS -->
+<!-- REPORTS -->
 
-  <section id="reportsPanel" class="card hidden">
-    <h2>Daily Sales Reports</h2>
+<section id="reportsPanel" class="card hidden">
+  <h2>Sales Reports</h2>
+
+  <div class="tabs" style="margin-bottom:14px;">
+    <button type="button" id="dailyModeBtn">
+      Daily Mode
+    </button>
+
+    <button type="button" id="rangeModeBtn" class="secondary">
+      Range Mode
+    </button>
+  </div>
+
+  <!-- DAILY MODE -->
+
+  <div id="dailyReportMode">
     <div id="reportList"></div>
-  </section>
+  </div>
+
+  <!-- RANGE MODE -->
+
+  <div id="rangeReportMode" class="hidden">
+
+    <div class="row">
+      <div>
+        <label>Start Date</label>
+        <input type="date" id="reportStartDate">
+      </div>
+
+      <div>
+        <label>End Date</label>
+        <input type="date" id="reportEndDate">
+      </div>
+    </div>
+
+    <button type="button" id="generateRangeReport">
+      Generate Range Report
+    </button>
+
+    <div id="rangeReportList"></div>
+
+  </div>
+
+</section>
 
     <!-- MY PROFILE -->
 
