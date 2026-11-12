@@ -116,6 +116,30 @@ label{font-size:13px;color:var(--muted)}
   margin-top:7px;
   font-size:11px;
   }
+ 
+/* FINANCIAL SUMMARY CARDS */
+
+.home-finance-tile{
+  grid-column:1 / -1;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:9px 12px;
+  min-height:0;
+}
+
+.home-finance-tile h3{
+  margin:0 0 4px;
+}
+
+.home-finance-tile .home-metric{
+  font-size:20px;
+}
+
+.home-finance-tile .muted{
+  margin-top:3px;
+}
+  
 
 /* BOTTOM NAVIGATION */
 
@@ -417,13 +441,13 @@ label{font-size:13px;color:var(--muted)}
     </button>
 
     
-<div class="home-tile">
+<div class="home-tile home-finance-tile">
   <h3>Remaining Order Amount to Deliver</h3>
   <div class="home-metric" id="homeRemainingOrder">—</div>
   <div class="muted">Pending Delivery Amount</div>
 </div>
 
-<div class="home-tile">
+<div class="home-tile home-finance-tile">
   <h3>Remaining Due Amount</h3>
   <div class="home-metric" id="homeRemainingDue">—</div>
   <div class="muted">Outstanding Customer Due</div>
