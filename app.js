@@ -1364,6 +1364,7 @@ function formatEntryTime(timestamp) {
 
 
 
+
 // ==========================================
 // SALES LIST
 // ==========================================
@@ -1426,10 +1427,22 @@ function renderSales() {
             </div>
           `).join("");
 
+        // ENTRY DISPLAY ORDER
+
         return `
           <div class="item">
 
             <b>${esc(s.date || "")}</b>
+
+            ${
+              detailsHTML
+                ? `
+                  <div style="margin-top:10px">
+                    ${detailsHTML}
+                  </div>
+                `
+                : ""
+            }
 
             ${
               itemHTML
@@ -1437,16 +1450,6 @@ function renderSales() {
                   <div style="margin-top:10px">
                     <b>Products Sold:</b>
                     ${itemHTML}
-                  </div>
-                `
-                : ""
-            }
-
-            ${
-              detailsHTML
-                ? `
-                  <div style="margin-top:10px">
-                    ${detailsHTML}
                   </div>
                 `
                 : ""
@@ -1504,6 +1507,7 @@ function renderSales() {
     });
   });
 }
+
 
 
 
