@@ -1363,6 +1363,7 @@ function formatEntryTime(timestamp) {
 }
 
 
+
 // ==========================================
 // SALES LIST
 // ==========================================
@@ -1384,29 +1385,82 @@ function renderSales() {
 
         const items = getSaleItems(s);
 
-        const itemText = items.map(item =>
-          `${esc(item.name)} ${esc(item.variant)}: ${Number(item.quantity)}`
-        ).join(", ");
+        // PRODUCT DETAILS
+
+        const itemHTML = items
+          .filter(item => Number(item.quantity || 0) !== 0)
+          .map(item => `
+            <div style="margin-top:5px">
+              ${esc(item.name)}
+              ${item.variant ? ` ${esc(item.variant)}` : ""}:
+              <b>${Number(item.quantity)} pcs</b>
+            </div>
+          `).join("");
+
+        // ONLY SHOW ENTERED / NON-ZERO DETAILS
+
+        const fields = [
+          ["Order", "order", "money"],
+          ["B2C", "b2c", "money"],
+          ["Shop Count", "shopCount", "number"],
+          ["Delivery", "delivery", "money"],
+          ["Cash", "cash", "money"],
+          ["Credit", "credit", "money"],
+          ["Due Collection", "dueCollection", "money"],
+          ["Total Collection", "totalCollection", "money"],
+          ["Cancelled", "cancelled", "money"]
+        ];
+
+        const detailsHTML = fields
+          .filter(([label, key]) =>
+            Number(s[key] || 0) !== 0
+          )
+          .map(([label, key, type]) => `
+            <div style="margin-top:5px">
+              ${label}:
+              <b>${
+                type === "money"
+                  ? money(s[key])
+                  : Number(s[key])
+              }</b>
+            </div>
+          `).join("");
 
         return `
           <div class="item">
 
             <b>${esc(s.date || "")}</b>
 
-· Order ${money(s.order)}
-· Collection ${money(s.totalCollection)}
-
-<div style="margin-top:8px;font-size:12px;color:#647484;">
-  Added by: ${esc(getEntryCreator(s.createdBy))}
-  <br>
-  Entry Time: ${esc(formatEntryTime(s.createdAt))}
-</div>
-
             ${
-              itemText
-                ? `<div style="margin-top:6px">${itemText}</div>`
+              itemHTML
+                ? `
+                  <div style="margin-top:10px">
+                    <b>Products Sold:</b>
+                    ${itemHTML}
+                  </div>
+                `
                 : ""
             }
+
+            ${
+              detailsHTML
+                ? `
+                  <div style="margin-top:10px">
+                    ${detailsHTML}
+                  </div>
+                `
+                : ""
+            }
+
+            <div style="
+              margin-top:10px;
+              font-size:12px;
+              color:#647484;
+            ">
+              Added by: ${esc(getEntryCreator(s.createdBy))}
+              <br>
+              Entry Time: ${esc(formatEntryTime(s.createdAt))}
+            </div>
 
             ${
               perms("salesDelete")
@@ -1450,6 +1504,7 @@ function renderSales() {
     });
   });
 }
+
 
 
 // ==========================================
