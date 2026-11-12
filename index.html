@@ -247,6 +247,29 @@ label{font-size:13px;color:var(--muted)}
   }
 
   
+/* RECENT ENTRY DATE */
+
+#salesList .item > b:first-child {
+  display: block;
+  font-size: 16px;
+  font-weight: 750;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+  
+/* COMPACT DELETE BUTTON */
+
+#salesList button[data-del-sale] {
+  width: auto;
+  min-width: 90px;
+  padding: 8px 20px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+  
+  
 </style>
 </head>
 
@@ -459,7 +482,7 @@ label{font-size:13px;color:var(--muted)}
 
   <!-- SALES -->
 
-  <section id="salesPanel" class="card hidden">
+  <section id="salesPanel" class="hidden">
 
      <!-- SALES ENTRY CARD -->
 
