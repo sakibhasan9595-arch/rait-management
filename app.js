@@ -1290,6 +1290,44 @@ function renderHome() {
 
   $("homeSalesDetails").textContent =
     `Collection: ${money(todayCollection)} | ${todaySales.length} Entries | ${todayQuantity} Pcs Sold`;
+
+  
+// ==========================================
+// REMAINING ORDER & DUE SUMMARY
+// ==========================================
+
+const totalOrder = sales.reduce(
+  (sum, sale) => sum + Number(sale.order || 0),
+  0
+);
+
+const totalCancelled = sales.reduce(
+  (sum, sale) => sum + Number(sale.cancelled || 0),
+  0
+);
+
+const totalDelivery = sales.reduce(
+  (sum, sale) => sum + Number(sale.delivery || 0),
+  0
+);
+
+const totalCredit = sales.reduce(
+  (sum, sale) => sum + Number(sale.credit || 0),
+  0
+);
+
+const totalDueCollection = sales.reduce(
+  (sum, sale) => sum + Number(sale.dueCollection || 0),
+  0
+);
+
+$("homeRemainingOrder").textContent =
+  money(totalOrder - totalCancelled - totalDelivery);
+
+$("homeRemainingDue").textContent =
+  money(totalCredit - totalDueCollection);
+  
+
 }
 
 
