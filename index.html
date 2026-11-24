@@ -268,6 +268,54 @@ label{font-size:13px;color:var(--muted)}
   border-radius: 8px;
   font-size: 13px;
 }
+
+/* PROFILE THREE DOT MENU */
+
+.profile-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#profileMenuBtn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
+  margin: 0;
+  border-radius: 10px;
+  font-size: 25px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 150px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.14);
+  z-index: 9999;
+}
+
+#profileMenu.hidden {
+  display: none;
+}
+
+#profileMenu #logoutBtn {
+  width: 100%;
+  margin: 0;
+  padding: 11px 14px;
+  text-align: left;
+  border-radius: 8px;
+  font-size: 14px;
+}
+  
   
   
 </style>
@@ -347,33 +395,51 @@ label{font-size:13px;color:var(--muted)}
 
 <section id="appView" class="hidden">
 
-    <!-- USER PROFILE HEADER -->
 
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;">
+<!-- USER PROFILE HEADER -->
 
-      <div style="width:58px;height:58px;min-width:58px;border-radius:50%;overflow:hidden;background:#eaf2f8;display:flex;align-items:center;justify-content:center;">
-        <img
-          id="headerPhoto"
-          class="hidden"
-          alt="Profile Photo"
-          style="width:100%;height:100%;object-fit:cover;"
-        >
-        <span id="headerPhotoFallback" style="font-size:25px;">👤</span>
-      </div>
+<div class="card">
+  <div style="display:flex;align-items:center;gap:12px;">
 
-      <div style="min-width:0;">
-        <strong id="welcome"></strong>
-        <div class="muted" id="headerUsername"></div>
-        <div class="muted" id="roleText"></div>
+    <div style="width:58px;height:58px;min-width:58px;border-radius:50%;overflow:hidden;background:#eaf2f8;display:flex;align-items:center;justify-content:center;">
+      <img
+        id="headerPhoto"
+        class="hidden"
+        alt="Profile Photo"
+        style="width:100%;height:100%;object-fit:cover;"
+      >
+      <span id="headerPhotoFallback" style="font-size:25px;">👤</span>
+    </div>
+
+    <div style="min-width:0;flex:1;">
+      <strong id="welcome"></strong>
+      <div class="muted" id="headerUsername"></div>
+      <div class="muted" id="roleText"></div>
+    </div>
+
+    <!-- PROFILE MENU -->
+    <div class="profile-menu-wrap">
+
+      <button
+        type="button"
+        id="profileMenuBtn"
+        class="secondary"
+        aria-label="Profile Menu"
+      >
+        ⋮
+      </button>
+
+      <div id="profileMenu" class="profile-menu hidden">
+        <button id="logoutBtn" type="button" class="secondary">
+          ↪ Logout
+        </button>
       </div>
 
     </div>
 
-    <button id="logoutBtn" class="secondary" style="margin-top:14px;">
-      Logout
-    </button>
   </div>
+</div>
+
 
     <!-- BOTTOM NAVIGATION -->
 
