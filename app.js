@@ -247,6 +247,22 @@ $("logoutBtn")?.addEventListener("click", () => signOut(auth));
 $("pendingLogout")?.addEventListener("click", () => signOut(auth));
 
 
+// PROFILE MENU
+
+$("profileMenuBtn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  $("profileMenu")?.classList.toggle("hidden");
+});
+
+// CLOSE MENU WHEN CLICKING OUTSIDE
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".profile-menu-wrap")) {
+    hide("profileMenu");
+  }
+});
+
+
 // OWNER PROFILE / AUTH STATE
 
 
