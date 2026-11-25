@@ -1802,10 +1802,12 @@ function renderProducts() {
             · ${esc(p.variant)}
 
             <div style="margin:8px 0">
-              Opening Stock: ${Number(p.opening || 0)}
-              <br>
-              <b>Remaining: ${remaining(p)}</b>
-            </div>
+  Opening Stock: ${Number(p.opening || 0)}
+  <br>
+  Minimum Stock: ${Number(p.minimum || 0)}
+  <br>
+  <b>Remaining: ${remaining(p)}</b>
+</div>
 
             ${
   perms("stockEdit")
@@ -1843,12 +1845,12 @@ function renderProducts() {
     ? `
       <div style="
         display:flex;
-        justify-content:flex-end;
+        justify-content:flex-start;
         margin-top:10px;
       ">
         <button
   class="danger"
-  style="font-size:11px;padding:5px 9px;"
+  style="font-size:11px;padding:4px 6px;width:auto;min-width:0;"
   data-delete-restock="${esc(r.id)}"
 >Delete Restock</button>
       </div>
