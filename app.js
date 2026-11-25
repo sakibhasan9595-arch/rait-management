@@ -24,7 +24,7 @@ import {
   runTransaction,
   enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
+alert("app.js module loaded");
 
 // FIREBASE CONFIG
 
