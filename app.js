@@ -1660,10 +1660,10 @@ function remaining(p) {
 }
 
 
+
 // ==========================================
 // PRODUCT LIST
 // ==========================================
-
 
 function renderProducts() {
 
@@ -1676,36 +1676,57 @@ function renderProducts() {
   }
 
   if ($("productsList")) {
+
     const stockSummary = `
-  <div class="item">
-    <h3>Current Stock Summary</h3>
+      <div class="item">
+        <h3>Current Stock Summary</h3>
 
-    ${
-      products.length
-        ? products.map(p => `
-            <div style="
-              display:flex;
-              justify-content:space-between;
-              gap:10px;
-              padding:8px 0;
-              border-bottom:1px solid #ddd;
-            ">
-              <div>
-                <b>${esc(p.name)}</b>
-                <div class="muted">${esc(p.variant)}</div>
-              </div>
+        ${
+          products.length
+            ? products.map(p => {
 
-              <b>${remaining(p)}</b>
-            </div>
-          `).join("")
-        : `<div class="muted">কোনো Product নেই।</div>`
-    }
-  </div>
-`;
+                const currentStock = remaining(p);
+                const minimumStock = Number(p.minimum || 0);
+                const isLowStock = currentStock <= minimumStock;
+
+                return `
+                  <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    gap:10px;
+                    padding:8px 0;
+                    border-bottom:1px solid #ddd;
+                  ">
+                    <div>
+                      <b>${esc(p.name)}</b>
+                      <div class="muted">${esc(p.variant)}</div>
+                    </div>
+
+                    <div style="text-align:right">
+                      <b>${currentStock}</b>
+                      <div style="
+                        font-size:12px;
+                        color:${isLowStock ? '#dc3545' : '#198754'};
+                      ">
+                        ${isLowStock ? 'Low Stock' : 'In Stock'}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join("")
+            : `<div class="muted">কোনো Product নেই।</div>`
+        }
+      </div>
+    `;
 
     $("productsList").innerHTML =
-  stockSummary +
-  products.map(p => {
+      stockSummary +
+      products.map(p => {
+
+        const currentStock = remaining(p);
+        const minimumStock = Number(p.minimum || 0);
+        const isLowStock = currentStock <= minimumStock;
 
         const productRestocks = restocks
           .filter(r => r.productId === p.id)
@@ -1722,7 +1743,15 @@ function renderProducts() {
             <div style="margin:8px 0">
               Opening Stock: ${Number(p.opening || 0)}
               <br>
-              <b>Remaining: ${remaining(p)}</b>
+              <b>Remaining: ${currentStock}</b>
+              <br>
+              Minimum Stock: ${minimumStock}
+              <br>
+              <b style="
+                color:${isLowStock ? '#dc3545' : '#198754'};
+              ">
+                ${isLowStock ? '⚠ Low Stock' : '✓ In Stock'}
+              </b>
             </div>
 
             ${
@@ -1741,18 +1770,19 @@ function renderProducts() {
                 ? `
                   <div style="margin-top:12px">
                     <b>Restock History</b>
+
                     ${productRestocks.map(r => `
-  <div class="item">
+                      <div class="item">
 
-    Date: ${esc(r.date || "")}
-    <br>
-    Quantity: ${Number(r.quantity || 0)}
+                        Date: ${esc(r.date || "")}
+                        <br>
+                        Quantity: ${Number(r.quantity || 0)}
 
-    <div style="margin-top:8px;font-size:12px;color:#647484;">
-      Added by: ${esc(getEntryCreator(r.createdBy))}
-      <br>
-      Entry Time: ${esc(formatEntryTime(r.createdAt))}
-    </div>
+                        <div style="margin-top:8px;font-size:12px;color:#647484;">
+                          Added by: ${esc(getEntryCreator(r.createdBy))}
+                          <br>
+                          Entry Time: ${esc(formatEntryTime(r.createdAt))}
+                        </div>
 
                         ${
                           perms("stockEdit")
@@ -1788,8 +1818,11 @@ function renderProducts() {
       }).join("") ||
       "এখনো কোনো product যোগ করা হয়নি।";
   }
+}
 
-  // EDIT OPENING STOCK
+
+  
+  // EDIT OPENING STOCK & MINIMUM STOCK
 
   document.querySelectorAll("[data-edit-opening]").forEach(b => {
 
@@ -1815,17 +1848,33 @@ function renderProducts() {
       const opening = Number(value);
 
       if (!Number.isFinite(opening) || opening < 0) {
-        return notice("সঠিক Quantity দাও।", "bad");
+        return notice("সঠিক Opening Stock দাও।", "bad");
+      }
+
+      const minimumValue = prompt(
+        "নতুন Minimum Stock Level দাও:",
+        product.minimum || 0
+      );
+
+      if (minimumValue === null) return;
+
+      const minimum = Number(minimumValue);
+
+      if (!Number.isFinite(minimum) || minimum < 0) {
+        return notice("সঠিক Minimum Stock দাও।", "bad");
       }
 
       try {
 
         await updateDoc(
           doc(db, "products", product.id),
-          { opening }
+          {
+            opening,
+            minimum
+          }
         );
 
-        notice("Opening Stock আপডেট হয়েছে।", "good");
+        notice("Stock Settings আপডেট হয়েছে।", "good");
 
         await refreshAll();
 
@@ -1834,6 +1883,7 @@ function renderProducts() {
       }
     });
   });
+
 
 
   // EDIT RESTOCK
