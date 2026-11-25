@@ -1650,6 +1650,42 @@ function remaining(p) {
   );
 }
 
+// STOCK STATUS
+
+function getStockStatus(p) {
+  const stock = remaining(p);
+  const minimum = Number(p.minimum || 0);
+
+  if (stock <= 0) {
+    return {
+      key: "out",
+      label: "Out of Stock",
+      color: "#dc3545"
+    };
+  }
+
+  if (minimum > 0 && stock <= minimum / 2) {
+    return {
+      key: "critical",
+      label: "Critical",
+      color: "#dc3545"
+    };
+  }
+
+  if (minimum > 0 && stock <= minimum) {
+    return {
+      key: "low",
+      label: "Low Stock",
+      color: "#d97706"
+    };
+  }
+
+  return {
+    key: "in",
+    label: "In Stock",
+    color: "#198754"
+  };
+}
 
 // ==========================================
 // PRODUCT LIST
@@ -1686,7 +1722,21 @@ function renderProducts() {
                 <div class="muted">${esc(p.variant)}</div>
               </div>
 
-              <b>${remaining(p)}</b>
+              <div style="
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+">
+  <b>${remaining(p)}</b>
+  <span style="
+    font-size:11px;
+    font-weight:600;
+    color:${getStockStatus(p).color};
+  ">
+    ${getStockStatus(p).label}
+  </span>
+</div>
             </div>
           `).join("")
         : `<div class="muted">কোনো Product নেই।</div>`
