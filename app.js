@@ -1541,6 +1541,7 @@ $("addProduct")?.addEventListener("click", async () => {
   const variant = val("pVariant").trim();
 
   const opening = num("pOpening");
+  const minimum = num("pMinimum");
 
   if (!name || !variant) {
     return notice(
@@ -1555,6 +1556,12 @@ $("addProduct")?.addEventListener("click", async () => {
       "bad"
     );
   }
+  if (minimum < 0) {
+  return notice(
+    "Minimum stock ঋণাত্মক হতে পারে না।",
+    "bad"
+  );
+  }
 
   try {
 
@@ -1562,12 +1569,14 @@ $("addProduct")?.addEventListener("click", async () => {
       name,
       variant,
       opening,
+      minimum,
       createdAt: serverTimestamp()
     });
 
     $("pName").value = "";
     $("pVariant").value = "";
     $("pOpening").value = "";
+    $("pMinimum").value = "";
 
     notice("Product যোগ হয়েছে।", "good");
 
