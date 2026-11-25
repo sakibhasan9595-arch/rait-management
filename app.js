@@ -675,6 +675,10 @@ $("openReportsFromHome")?.addEventListener("click", () => {
   document.querySelector('[data-tab="reportsPanel"]')?.click();
 });
 
+$("openLowStockFromHome")?.addEventListener("click", () => {
+  document.querySelector('[data-tab="stockPanel"]')?.click();
+});
+
 // DATABASE READ
 
 async function readCol(name) {
@@ -1273,6 +1277,24 @@ function renderHome() {
 
   $("homeStockDetails").textContent =
     products.length + " Products";
+
+  const stockAlerts = products.filter(
+  p => getStockStatus(p).key !== "in"
+);
+
+const criticalCount = products.filter(
+  p => getStockStatus(p).key === "critical"
+).length;
+
+const outCount = products.filter(
+  p => getStockStatus(p).key === "out"
+).length;
+
+$("homeLowStockCount").textContent =
+  stockAlerts.length + " Products";
+
+$("homeLowStockDetails").textContent =
+  `${criticalCount} Critical | ${outCount} Out of Stock`;
 
 
   // TODAY'S SALES SUMMARY
