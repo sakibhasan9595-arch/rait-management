@@ -352,6 +352,67 @@ label{font-size:13px;color:var(--muted)}
   font-size: 14px;
 }
   
+/* OTHER FEATURES */
+
+.other-features {
+  margin-top: 22px;
+}
+
+.other-features h3 {
+  font-size: 13px;
+  color: #000;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.feature-item {
+  width: 100px;
+  text-align: center;
+}
+
+.barcode-feature-btn {
+  width: 80px;
+  height: 80px;
+  padding: 8px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.barcode-feature-btn svg {
+  width: 48px;
+  height: 38px;
+}
+
+.barcode-feature-btn span {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.feature-label {
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #000;
+  font-weight: 500;
+  }
+
   
   
 </style>
@@ -587,6 +648,41 @@ label{font-size:13px;color:var(--muted)}
     
 
   </div>
+
+
+  <div class="other-features">
+    <h3>Other Features</h3>
+
+    <div class="feature-list">
+      <div class="feature-item">
+        <button
+          type="button"
+          class="barcode-feature-btn"
+          id="openBarcodeScannerFromHome"
+        >
+          <svg
+            width="48"
+            height="38"
+            viewBox="0 0 48 38"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M3 3V10M3 3H10M45 3H38M45 3V10M3 35V28M3 35H10M45 35H38M45 35V28"
+              stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M12 11V27M16 11V27M20 11V27M25 11V27M28 11V27M33 11V27M37 11V27"
+              stroke="white" stroke-width="2"/>
+          </svg>
+          <span>SCANNER</span>
+        </button>
+
+        <div class="feature-label">
+          Scan for Product Details
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
 </section>
 
   <!-- SALES -->
