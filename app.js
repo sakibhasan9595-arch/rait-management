@@ -132,6 +132,7 @@ if ($("sDate")) $("sDate").value = today();
 if ($("rDate")) $("rDate").value = today();
 
 
+alert("Login section reached");
 // LOGIN
 $("loginBtn")?.addEventListener("click", async () => {
   notice("Login button received. Checking Firebase...", "bad");
