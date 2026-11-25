@@ -102,6 +102,23 @@ label{font-size:13px;color:var(--muted)}
   text-align:left;
   box-shadow:0 2px 8px #142c4210;
 }
+
+ .low-stock-alert {
+  background: #fff1f1;
+  color: #000000;
+  border: 1px solid #f5bcbc;
+  width: 220px;
+max-width: 100%;
+padding: 10px 12px;
+}
+
+.low-stock-alert h3,
+.low-stock-alert .home-metric,
+.low-stock-alert .muted {
+  color: #000000;
+} 
+
+  
 .home-tile h3{
   color:var(--navy);
   font-size:14px;
@@ -529,8 +546,8 @@ label{font-size:13px;color:var(--muted)}
       <div class="muted">Tap to view Reports →</div>
     </button>
 
-        <button type="button" class="home-tile" id="openLowStockFromHome">
-      <h3>Low Stock Summary</h3>
+        <button type="button" class="home-tile low-stock-alert" id="openLowStockFromHome">
+  <h3>⚠ Low Stock Alert</h3>
       <div class="home-metric" id="homeLowStockCount">—</div>
       <div class="muted" id="homeLowStockDetails">Loading...</div>
       <div class="muted">Tap to view Stock →</div>
