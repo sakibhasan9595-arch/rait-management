@@ -1808,6 +1808,17 @@ function renderProducts() {
             </div>
 
             ${
+  perms("stockEdit")
+    ? `
+      <button
+        class="secondary"
+        data-edit-product="${esc(p.id)}"
+      >Edit Product</button>
+    `
+    : ""
+            }
+
+            ${
               productRestocks.length
                 ? `
                   <div style="margin-top:12px">
@@ -1836,9 +1847,10 @@ function renderProducts() {
         margin-top:10px;
       ">
         <button
-          class="danger"
-          data-delete-restock="${esc(r.id)}"
-        >Delete Restock</button>
+  class="danger"
+  style="font-size:11px;padding:5px 9px;"
+  data-delete-restock="${esc(r.id)}"
+>Delete Restock</button>
       </div>
     `
     : ""
