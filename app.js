@@ -1750,17 +1750,33 @@ function renderProducts() {
               <div style="
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   white-space:nowrap;
 ">
-  <b>${remaining(p)}</b>
   <span style="
+    padding:4px 9px;
+    border-radius:20px;
     font-size:11px;
     font-weight:600;
-    color:${getStockStatus(p).color};
+    background:${
+      getStockStatus(p).key === "in" ? "#dcfce7" :
+      getStockStatus(p).key === "low" ? "#fef3c7" :
+      getStockStatus(p).key === "critical" ? "#fee2e2" :
+      "#e5e7eb"
+    };
+    color:${
+      getStockStatus(p).key === "in" ? "#166534" :
+      getStockStatus(p).key === "low" ? "#92400e" :
+      getStockStatus(p).key === "critical" ? "#991b1b" :
+      "#374151"
+    };
   ">
     ${getStockStatus(p).label}
   </span>
+
+  <b style="font-size:15px;">
+    ${remaining(p)}
+  </b>
 </div>
             </div>
           `).join("")
