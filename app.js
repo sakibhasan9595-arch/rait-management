@@ -1563,6 +1563,7 @@ $("addProduct")?.addEventListener("click", async () => {
   const variant = val("pVariant").trim();
 
   const opening = num("pOpening");
+  const minimum = num("pMinimum");
 
   if (!name || !variant) {
     return notice(
@@ -1584,12 +1585,14 @@ $("addProduct")?.addEventListener("click", async () => {
       name,
       variant,
       opening,
+      minimum,
       createdAt: serverTimestamp()
     });
 
     $("pName").value = "";
     $("pVariant").value = "";
     $("pOpening").value = "";
+    $("pMinimum").value = "";
 
     notice("Product যোগ হয়েছে।", "good");
 
@@ -1789,17 +1792,6 @@ function renderProducts() {
             </div>
 
             ${
-              perms("stockEdit")
-                ? `
-                  <button
-                    class="secondary"
-                    data-edit-opening="${esc(p.id)}"
-                  >Edit Opening Stock</button>
-                `
-                : ""
-            }
-
-            ${
               productRestocks.length
                 ? `
                   <div style="margin-top:12px">
@@ -1817,26 +1809,23 @@ function renderProducts() {
       Entry Time: ${esc(formatEntryTime(r.createdAt))}
     </div>
 
-                        ${
-                          perms("stockEdit")
-                            ? `
-                              <button
-                                class="secondary"
-                                data-edit-restock="${esc(r.id)}"
-                              >Edit Restock</button>
-                            `
-                            : ""
-                        }
+                        
 
                         ${
-                          perms("stockDelete")
-                            ? `
-                              <button
-                                class="danger"
-                                data-delete-restock="${esc(r.id)}"
-                              >Delete Restock</button>
-                            `
-                            : ""
+  perms("stockDelete")
+    ? `
+      <div style="
+        display:flex;
+        justify-content:flex-end;
+        margin-top:10px;
+      ">
+        <button
+          class="danger"
+          data-delete-restock="${esc(r.id)}"
+        >Delete Restock</button>
+      </div>
+    `
+    : ""
                         }
 
                       </div>
@@ -1852,51 +1841,69 @@ function renderProducts() {
       "এখনো কোনো product যোগ করা হয়নি।";
   }
 
-  // EDIT OPENING STOCK
+  // EDIT PRODUCT
 
-  document.querySelectorAll("[data-edit-opening]").forEach(b => {
+document.querySelectorAll("[data-edit-product]").forEach(b => {
 
-    b.addEventListener("click", async () => {
+  b.addEventListener("click", async () => {
 
-      if (!perms("stockEdit")) {
-        return notice("Stock edit permission নেই।", "bad");
-      }
+    if (!perms("stockEdit")) {
+      return notice("Stock edit permission নেই।", "bad");
+    }
 
-      const product = products.find(
-        p => p.id === b.dataset.editOpening
+    const product = products.find(
+      p => p.id === b.dataset.editProduct
+    );
+
+    if (!product) return;
+
+    const openingText = prompt(
+      "নতুন Opening Stock দাও:",
+      product.opening || 0
+    );
+
+    if (openingText === null) return;
+
+    const opening = Number(openingText);
+
+    if (!Number.isFinite(opening) || opening < 0) {
+      return notice("সঠিক Opening Stock দাও।", "bad");
+    }
+
+    const minimumText = prompt(
+      "নতুন Minimum Stock Quantity দাও:",
+      product.minimum || 0
+    );
+
+    if (minimumText === null) return;
+
+    const minimum = Number(minimumText);
+
+    if (!Number.isFinite(minimum) || minimum < 0) {
+      return notice("সঠিক Minimum Stock দাও।", "bad");
+    }
+
+    try {
+
+      await updateDoc(
+        doc(db, "products", product.id),
+        {
+          opening,
+          minimum
+        }
       );
 
-      if (!product) return;
+      notice("Product সফলভাবে Update হয়েছে।", "good");
 
-      const value = prompt(
-        "নতুন Opening Stock দাও:",
-        product.opening || 0
-      );
+      await refreshAll();
 
-      if (value === null) return;
+    } catch (e) {
+      notice(friendly(e), "bad");
+    }
 
-      const opening = Number(value);
-
-      if (!Number.isFinite(opening) || opening < 0) {
-        return notice("সঠিক Quantity দাও।", "bad");
-      }
-
-      try {
-
-        await updateDoc(
-          doc(db, "products", product.id),
-          { opening }
-        );
-
-        notice("Opening Stock আপডেট হয়েছে।", "good");
-
-        await refreshAll();
-
-      } catch (e) {
-        notice(friendly(e), "bad");
-      }
-    });
   });
+
+});
 
 
   // EDIT RESTOCK
