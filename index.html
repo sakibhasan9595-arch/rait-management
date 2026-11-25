@@ -592,12 +592,14 @@ label{font-size:13px;color:var(--muted)}
     <h3>Products & Remaining Stock</h3>
     <div id="productsList"></div>
 
+
     <!-- ADD PRODUCT -->
     <h3>Add Product</h3>
     <div class="row">
       <input id="pName" placeholder="Product name">
       <input id="pVariant" placeholder="Variant (e.g. 100 pages)">
       <input id="pOpening" type="number" min="0" placeholder="Opening stock">
+      <input id="pMinimum" type="number" min="0" placeholder="Minimum stock level">
     </div>
     <button id="addProduct">Add Product</button>
 
@@ -609,6 +611,7 @@ label{font-size:13px;color:var(--muted)}
       <input id="rDate" type="date">
     </div>
     <button id="addRestock">Save Restock</button>
+
 
   </section>
 
