@@ -685,6 +685,40 @@ label{font-size:13px;color:var(--muted)}
   
 </section>
 
+  <!-- BARCODE SCANNER PANEL -->
+
+<section id="barcodeScannerPanel" class="card hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    <h2 style="margin:0;">Scan Product Barcode</h2>
+
+    <button
+      type="button"
+      id="closeBarcodeScanner"
+      class="secondary"
+      style="width:auto;padding:8px 14px;"
+    >
+      Close
+    </button>
+  </div>
+
+  <p id="barcodeScannerStatus" class="muted">
+    Camera চালু হচ্ছে...
+  </p>
+
+  <div style="width:100%;overflow:hidden;border-radius:12px;background:#111;">
+    <video
+      id="barcodeVideo"
+      autoplay
+      muted
+      playsinline
+      style="width:100%;display:block;min-height:220px;object-fit:cover;"
+    ></video>
+  </div>
+
+</section>
+  
+
   <!-- SALES -->
 
   <section id="salesPanel" class="hidden">
@@ -877,7 +911,8 @@ label{font-size:13px;color:var(--muted)}
 </section>
 </main>
 
-<script type="module" src="app.js"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+  <script type="module" src="app.js"></script>
 
 </body>
      </html>
