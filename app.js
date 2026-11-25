@@ -1282,6 +1282,9 @@ function renderHome() {
   p => getStockStatus(p).key !== "in"
 );
 
+  $("openLowStockFromHome").style.display =
+  stockAlerts.length > 0 ? "" : "none";
+
 const criticalCount = products.filter(
   p => getStockStatus(p).key === "critical"
 ).length;
