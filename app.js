@@ -679,7 +679,82 @@ $("openLowStockFromHome")?.addEventListener("click", () => {
   document.querySelector('[data-tab="stockPanel"]')?.click();
 });
 
+
 // BARCODE SCANNER OPEN / CLOSE
+
+let barcodeScannerControls = null;
+
+function stopBarcodeScanner() {
+
+  if (barcodeScannerControls) {
+    barcodeScannerControls.stop();
+    barcodeScannerControls = null;
+  }
+
+  const video = $("barcodeVideo");
+
+  if (video?.srcObject) {
+    video.srcObject.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
+  }
+
+}
+
+async function startBarcodeScanner() {
+
+  const video = $("barcodeVideo");
+  const status = $("barcodeScannerStatus");
+
+  if (!video || !status) return;
+
+  if (!window.ZXingBrowser?.BrowserMultiFormatReader) {
+    status.textContent = "Barcode Scanner Library Load হয়নি।";
+    return;
+  }
+
+  try {
+
+    status.textContent = "Camera চালু হচ্ছে...";
+
+    const reader =
+      new window.ZXingBrowser.BrowserMultiFormatReader();
+
+    barcodeScannerControls =
+      await reader.decodeFromVideoDevice(
+        undefined,
+        video,
+        (result, error, controls) => {
+
+          if (controls) {
+            barcodeScannerControls = controls;
+          }
+
+          if (result) {
+
+            const barcode = result.getText().trim();
+
+            stopBarcodeScanner();
+
+            status.textContent =
+              "Barcode পাওয়া গেছে: " + barcode;
+
+            console.log("Scanned Barcode:", barcode);
+
+          }
+
+        }
+      );
+
+  } catch (e) {
+
+    console.error("Barcode camera error:", e);
+
+    status.textContent =
+      "Camera চালু করা যায়নি। Camera Permission পরীক্ষা করো।";
+
+  }
+
+}
 
 $("openBarcodeScannerFromHome")?.addEventListener("click", () => {
 
@@ -695,14 +770,19 @@ $("openBarcodeScannerFromHome")?.addEventListener("click", () => {
 
   show("barcodeScannerPanel");
 
+  startBarcodeScanner();
+
 });
 
 $("closeBarcodeScanner")?.addEventListener("click", () => {
+
+  stopBarcodeScanner();
 
   hide("barcodeScannerPanel");
   show("homePanel");
 
 });
+
 
 
 // DATABASE READ
