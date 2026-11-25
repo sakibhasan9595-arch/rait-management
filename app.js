@@ -133,16 +133,23 @@ if ($("rDate")) $("rDate").value = today();
 
 
 // LOGIN
-
 $("loginBtn")?.addEventListener("click", async () => {
+  notice("Login button received. Checking Firebase...", "bad");
+
   try {
-    await signInWithEmailAndPassword(
+    const result = await signInWithEmailAndPassword(
       auth,
       val("loginEmail").trim(),
       val("loginPass")
     );
+
+    notice("Firebase login successful!", "good");
+
   } catch (e) {
-    notice(friendly(e), "bad");
+    notice(
+      "Firebase Error: " + e.code + " | " + e.message,
+      "bad"
+    );
   }
 });
 
