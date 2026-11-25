@@ -700,6 +700,199 @@ function stopBarcodeScanner() {
 
 }
 
+
+// ==========================================
+// BARCODE PRODUCT LOOKUP & DETAILS
+// ==========================================
+
+let barcodeSelectedProductId = null;
+
+function showProductDetailsByBarcode(barcode) {
+
+  const status = $("barcodeScannerStatus");
+
+  const matches = products.filter(
+    p => String(p.barcode || "").trim() === barcode
+  );
+
+  if (matches.length === 0) {
+    status.textContent = "Product Not Found: " + barcode;
+    return;
+  }
+
+  if (matches.length > 1) {
+    status.textContent =
+      "এই Barcode একাধিক Product-এ পাওয়া গেছে। Firebase Data ঠিক করো।";
+    return;
+  }
+
+  const product = matches[0];
+
+  barcodeSelectedProductId = product.id;
+
+  stopBarcodeScanner();
+
+  hide("barcodeScannerPanel");
+
+  show("productDetailsPanel");
+
+  $("detailProductName").textContent =
+    product.name || "—";
+
+  $("detailProductVariant").textContent =
+    product.variant || "—";
+
+  $("detailProductMrp").textContent =
+    product.mrp !== undefined && product.mrp !== null
+      ? "MRP: " + money(product.mrp)
+      : "MRP: Not Set";
+
+  $("detailCurrentStock").textContent =
+    remaining(product).toLocaleString();
+
+  $("detailMinimumStock").textContent =
+    Number(product.minimum || 0).toLocaleString();
+
+  // PRODUCT IMAGE
+
+  const imageURL =
+    product.imageUrl || product.imageURL || product.photoURL || "";
+
+  const image = $("detailProductImage");
+  const fallback = $("detailImageFallback");
+
+  if (imageURL) {
+    image.src = imageURL;
+    image.classList.remove("hidden");
+    fallback.classList.add("hidden");
+
+    image.onerror = () => {
+      image.classList.add("hidden");
+      fallback.classList.remove("hidden");
+    };
+
+  } else {
+    image.removeAttribute("src");
+    image.classList.add("hidden");
+    fallback.classList.remove("hidden");
+  }
+
+  // LAST RESTOCK
+
+  const productRestocks = restocks
+    .filter(r => r.productId === product.id)
+    .sort((a, b) =>
+      String(b.date || "").localeCompare(String(a.date || ""))
+    );
+
+  const lastRestock = productRestocks[0];
+
+  $("detailLastRestockDate").textContent =
+    lastRestock?.date || "—";
+
+  $("detailLastRestockQty").textContent =
+    lastRestock
+      ? Number(lastRestock.quantity || 0).toLocaleString()
+      : "—";
+
+  // LIFETIME TOTAL SOLD
+
+  const productSales = sales
+    .map(sale => ({
+      date: sale.date || "",
+      quantity: getSaleItems(sale)
+        .filter(item => item.productId === product.id)
+        .reduce(
+          (sum, item) => sum + Number(item.quantity || 0),
+          0
+        )
+    }))
+    .filter(item => item.quantity > 0)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const lifetimeSold = productSales.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  $("detailLifetimeSold").textContent =
+    lifetimeSold.toLocaleString() + " Pcs";
+
+  // RECENT 5 SALES
+
+  $("detailRecentSales").innerHTML =
+    productSales.slice(0, 5).map(item => `
+      <div class="product-detail-history">
+        <b>${esc(item.date || "Date unavailable")}</b>
+        <div class="muted">
+          Quantity: ${item.quantity.toLocaleString()} Pcs
+        </div>
+      </div>
+    `).join("") || '<p class="muted">No Sales Data</p>';
+
+  // RESET DATE RANGE SUMMARY
+
+  $("detailSalesStartDate").value = "";
+  $("detailSalesEndDate").value = "";
+
+  $("detailSalesSummary").textContent =
+    "Date Range Sales: —";
+
+}
+
+// CLOSE PRODUCT DETAILS
+
+$("closeProductDetails")?.addEventListener("click", () => {
+
+  hide("productDetailsPanel");
+  show("homePanel");
+
+  barcodeSelectedProductId = null;
+
+});
+
+// DATE RANGE SALES SUMMARY
+
+$("generateProductSalesSummary")?.addEventListener("click", () => {
+
+  const productId = barcodeSelectedProductId;
+
+  if (!productId) return;
+
+  const startDate = val("detailSalesStartDate");
+  const endDate = val("detailSalesEndDate");
+
+  if (!startDate || !endDate || startDate > endDate) {
+    return notice("সঠিক Start Date ও End Date নির্বাচন করো।", "bad");
+  }
+
+  const total = sales.reduce((sum, sale) => {
+
+    if (
+      !sale.date ||
+      sale.date < startDate ||
+      sale.date > endDate
+    ) {
+      return sum;
+    }
+
+    const quantity = getSaleItems(sale)
+      .filter(item => item.productId === productId)
+      .reduce(
+        (total, item) => total + Number(item.quantity || 0),
+        0
+      );
+
+    return sum + quantity;
+
+  }, 0);
+
+  $("detailSalesSummary").textContent =
+    `Total Sold: ${total.toLocaleString()} Pcs`;
+
+});
+      
+
 async function startBarcodeScanner() {
 
   const video = $("barcodeVideo");
@@ -736,9 +929,9 @@ async function startBarcodeScanner() {
             stopBarcodeScanner();
 
             status.textContent =
-              "Barcode পাওয়া গেছে: " + barcode;
+  "Barcode পাওয়া গেছে: " + barcode;
 
-            console.log("Scanned Barcode:", barcode);
+showProductDetailsByBarcode(barcode);
 
           }
 
