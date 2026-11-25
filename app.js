@@ -2117,6 +2117,20 @@ function renderProducts() {
             <b>${esc(p.name)}</b>
             · ${esc(p.variant)}
 
+${
+  profile?.role === "owner"
+    ? `
+      <button
+        class="secondary"
+        data-upload-product-image="${esc(p.id)}"
+      >
+        ${p.imageUrl ? "Replace Product Image" : "Upload Product Image"}
+      </button>
+    `
+    : ""
+}
+            
+
             <div style="margin:8px 0">
   Opening Stock: ${Number(p.opening || 0)}
   <br>
@@ -2187,6 +2201,100 @@ function renderProducts() {
       "এখনো কোনো product যোগ করা হয়নি।";
   }
 
+  // PRODUCT IMAGE UPLOAD / REPLACE — OWNER ONLY
+
+  document.querySelectorAll("[data-upload-product-image]").forEach(b => {
+
+    b.addEventListener("click", () => {
+
+      if (profile?.role !== "owner") {
+        return notice("শুধু Owner Product Image Upload করতে পারবেন।", "bad");
+      }
+
+      const product = products.find(
+        p => p.id === b.dataset.uploadProductImage
+      );
+
+      if (!product) {
+        return notice("Product পাওয়া যায়নি।", "bad");
+      }
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+
+      input.addEventListener("change", async () => {
+
+        const file = input.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+          return notice("শুধু Image Upload করা যাবে।", "bad");
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          return notice("ছবির সাইজ 5 MB-এর কম হতে হবে।", "bad");
+        }
+
+        if (profile?.role !== "owner") {
+          return notice("Upload করার অনুমতি নেই।", "bad");
+        }
+
+        try {
+
+          notice("Product Image Upload হচ্ছে...", "good");
+
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("upload_preset", "rait_profile_photos");
+
+          const response = await fetch(
+            "https://api.cloudinary.com/v1_1/ijf3buns/image/upload",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              result.error?.message || "Cloudinary Upload failed"
+            );
+          }
+
+          if (!result.secure_url) {
+            throw new Error("Image URL পাওয়া যায়নি।");
+          }
+
+          await updateDoc(
+            doc(db, "products", product.id),
+            {
+              imageUrl: result.secure_url,
+              updatedAt: serverTimestamp()
+            }
+          );
+
+          product.imageUrl = result.secure_url;
+
+          notice("Product Image সফলভাবে Upload হয়েছে।", "good");
+
+          await refreshAll();
+
+        } catch (e) {
+          console.error("Product image upload failed:", e);
+          notice("Image Upload Error: " + e.message, "bad");
+        }
+
+      });
+
+      input.click();
+
+    });
+
+  });
+  
   // EDIT PRODUCT
 
 document.querySelectorAll("[data-edit-product]").forEach(b => {
