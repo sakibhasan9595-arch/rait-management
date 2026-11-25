@@ -414,6 +414,87 @@ label{font-size:13px;color:var(--muted)}
   }
 
   
+/* BARCODE PRODUCT DETAILS */
+
+.product-detail-image {
+  width: 120px;
+  height: 120px;
+  margin: 12px auto;
+  border-radius: 12px;
+  background: #f3f3f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #777;
+  font-size: 12px;
+}
+
+.product-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-detail-title {
+  text-align: center;
+  color: #111;
+  font-size: 20px;
+  font-weight: 750;
+  margin: 8px 0 3px;
+}
+
+.product-detail-variant {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+}
+
+.product-detail-mrp {
+  text-align: center;
+  font-size: 25px;
+  font-weight: 800;
+  color: #111;
+  margin: 10px 0 16px;
+}
+
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 12px 0;
+}
+
+.product-detail-box {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.product-detail-box strong {
+  display: block;
+  font-size: 19px;
+  color: #111;
+  margin-top: 5px;
+}
+
+.product-detail-section {
+  margin-top: 18px;
+}
+
+.product-detail-section h3 {
+  margin-bottom: 9px;
+  color: #111;
+}
+
+.product-detail-history {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+  }
+  
   
 </style>
 </head>
@@ -714,6 +795,107 @@ label{font-size:13px;color:var(--muted)}
       playsinline
       style="width:100%;display:block;min-height:220px;object-fit:cover;"
     ></video>
+  </div>
+
+</section>
+
+  
+<!-- PRODUCT DETAILS PANEL -->
+
+<section id="productDetailsPanel" class="card hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    <h2 style="margin:0;">Product Details</h2>
+
+    <button
+      type="button"
+      id="closeProductDetails"
+      class="secondary"
+      style="width:auto;padding:8px 14px;"
+    >
+      Close
+    </button>
+  </div>
+
+  <div class="product-detail-image">
+    <img id="detailProductImage" class="hidden" alt="Product Image">
+    <span id="detailImageFallback">No Image</span>
+  </div>
+
+  <div id="detailProductName" class="product-detail-title">
+    Product Name
+  </div>
+
+  <div id="detailProductVariant" class="product-detail-variant">
+    Product Variant
+  </div>
+
+  <div id="detailProductMrp" class="product-detail-mrp">
+    MRP: —
+  </div>
+
+  <div class="product-detail-section">
+    <h3>Stock Information</h3>
+
+    <div class="product-detail-grid">
+
+      <div class="product-detail-box">
+        <span class="muted">Current Stock</span>
+        <strong id="detailCurrentStock">—</strong>
+      </div>
+
+      <div class="product-detail-box">
+        <span class="muted">Minimum Stock</span>
+        <strong id="detailMinimumStock">—</strong>
+      </div>
+
+      <div class="product-detail-box">
+        <span class="muted">Last Restock Date</span>
+        <strong id="detailLastRestockDate" style="font-size:14px;">—</strong>
+      </div>
+
+      <div class="product-detail-box">
+        <span class="muted">Last Restock Quantity</span>
+        <strong id="detailLastRestockQty">—</strong>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="product-detail-section">
+    <h3>Sales Information</h3>
+
+    <div class="product-detail-box">
+      <span class="muted">Lifetime Total Sold</span>
+      <strong id="detailLifetimeSold">—</strong>
+    </div>
+
+    <div class="product-detail-section">
+      <h3>Date Range Sales Summary</h3>
+
+      <label>Start Date</label>
+      <input type="date" id="detailSalesStartDate">
+
+      <label>End Date</label>
+      <input type="date" id="detailSalesEndDate">
+
+      <button type="button" id="generateProductSalesSummary">
+        Generate Summary
+      </button>
+
+      <div id="detailSalesSummary" class="product-detail-history">
+        Date Range Sales: —
+      </div>
+    </div>
+
+    <div class="product-detail-section">
+      <h3>Recent 5 Sales Entries</h3>
+
+      <div id="detailRecentSales">
+        <p class="muted">No Sales Data</p>
+      </div>
+    </div>
+
   </div>
 
 </section>
