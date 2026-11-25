@@ -679,6 +679,32 @@ $("openLowStockFromHome")?.addEventListener("click", () => {
   document.querySelector('[data-tab="stockPanel"]')?.click();
 });
 
+// BARCODE SCANNER OPEN / CLOSE
+
+$("openBarcodeScannerFromHome")?.addEventListener("click", () => {
+
+  [
+    "homePanel",
+    "salesPanel",
+    "stockPanel",
+    "reportsPanel",
+    "myProfilePanel",
+    "membersPanel",
+    "usersPanel"
+  ].forEach(hide);
+
+  show("barcodeScannerPanel");
+
+});
+
+$("closeBarcodeScanner")?.addEventListener("click", () => {
+
+  hide("barcodeScannerPanel");
+  show("homePanel");
+
+});
+
+
 // DATABASE READ
 
 async function readCol(name) {
