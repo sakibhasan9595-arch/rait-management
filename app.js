@@ -1564,15 +1564,27 @@ $("addProduct")?.addEventListener("click", async () => {
 
   const name = val("pName").trim();
   const variant = val("pVariant").trim();
-
   const opening = num("pOpening");
   const minimum = num("pMinimum");
+  const barcode = val("pBarcode").trim();
 
   if (!name || !variant) {
     return notice(
       "Product name ও variant দাও।",
       "bad"
     );
+  }
+
+  if (
+  barcode &&
+  products.some(
+    p => String(p.barcode || "").trim() === barcode
+  )
+) {
+  return notice(
+    "এই Barcode Number অন্য একটি Product-এ ব্যবহার করা হয়েছে।",
+    "bad"
+  );
   }
 
   if (opening < 0) {
@@ -1589,6 +1601,7 @@ $("addProduct")?.addEventListener("click", async () => {
       variant,
       opening,
       minimum,
+      barcode,
       createdAt: serverTimestamp()
     });
 
@@ -1596,6 +1609,7 @@ $("addProduct")?.addEventListener("click", async () => {
     $("pVariant").value = "";
     $("pOpening").value = "";
     $("pMinimum").value = "";
+    $("pBarcode").value = "";
 
     notice("Product যোগ হয়েছে।", "good");
 
