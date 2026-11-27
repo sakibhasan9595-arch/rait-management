@@ -2206,41 +2206,113 @@ function renderProducts() {
         return `
           <div class="item">
 
-            <b>${esc(p.name)}</b>
-            · ${esc(p.variant)}
-
-${
-  profile?.role === "owner"
-    ? `
-      <button
-        class="secondary"
-        data-upload-product-image="${esc(p.id)}"
-      >
-        ${p.imageUrl ? "Replace Product Image" : "Upload Product Image"}
-      </button>
-    `
-    : ""
-}
             
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+            ">
+
+              <div style="min-width:0;">
+                <b>${esc(p.name)}</b>
+                · ${esc(p.variant)}
+              </div>
+
+              ${
+                profile?.role === "owner" || perms("stockEdit")
+                  ? `
+                    <div
+                      data-stock-menu-wrap
+                      style="position:relative;flex-shrink:0;"
+                    >
+
+                      <button
+                        type="button"
+                        data-stock-menu-toggle
+                        aria-label="Product options"
+                        aria-expanded="false"
+                        style="
+                          width:42px;
+                          min-width:42px;
+                          height:34px;
+                          padding:0;
+                          margin:0;
+                          border:1px solid #ddd;
+                          border-radius:8px;
+                          background:#f5f5f5;
+                          color:#222;
+                          font-size:19px;
+                          font-weight:bold;
+                          letter-spacing:2px;
+                        "
+                      >•••</button>
+
+                      <div
+                        data-stock-menu
+                        style="
+                          display:none;
+                          position:absolute;
+                          top:40px;
+                          right:0;
+                          width:205px;
+                          padding:7px;
+                          background:#fff;
+                          border:1px solid #ddd;
+                          border-radius:9px;
+                          box-shadow:0 5px 18px rgba(0,0,0,.15);
+                          z-index:100;
+                        "
+                      >
+
+                        ${
+                          profile?.role === "owner"
+                            ? `
+                              <button
+                                type="button"
+                                class="secondary"
+                                data-upload-product-image="${esc(p.id)}"
+                                data-stock-menu-action
+                                style="width:100%;margin:0 0 5px;text-align:left;"
+                              >
+                                ${p.imageUrl ? "Replace Product Image" : "Upload Product Image"}
+                              </button>
+                            `
+                            : ""
+                        }
+
+                        ${
+                          perms("stockEdit")
+                            ? `
+                              <button
+                                type="button"
+                                class="secondary"
+                                data-edit-product="${esc(p.id)}"
+                                data-stock-menu-action
+                                style="width:100%;margin:0;text-align:left;"
+                              >
+                                Edit Product
+                              </button>
+                            `
+                            : ""
+                        }
+
+                      </div>
+                    </div>
+                  `
+                  : ""
+              }
+
+            </div>
 
             <div style="margin:8px 0">
-  Opening Stock: ${Number(p.opening || 0)}
-  <br>
-  Minimum Stock: ${Number(p.minimum || 0)}
-  <br>
-  <b>Remaining: ${remaining(p)}</b>
-</div>
-
-            ${
-  perms("stockEdit")
-    ? `
-      <button
-        class="secondary"
-        data-edit-product="${esc(p.id)}"
-      >Edit Product</button>
-    `
-    : ""
-            }
+              Opening Stock: ${Number(p.opening || 0)}
+              <br>
+              Minimum Stock: ${Number(p.minimum || 0)}
+              <br>
+              <b>Remaining: ${remaining(p)}</b>
+            </div>
+      
 
             ${
               productRestocks.length
@@ -2292,6 +2364,60 @@ ${
       }).join("") ||
       "এখনো কোনো product যোগ করা হয়নি।";
   }
+
+  
+  // PRODUCT CARD THREE-DOT MENU
+
+  document.querySelectorAll("[data-stock-menu-toggle]").forEach(button => {
+
+    button.addEventListener("click", event => {
+
+      event.stopPropagation();
+
+      const menu = button.parentElement.querySelector("[data-stock-menu]");
+
+      const isOpen = menu.style.display === "block";
+
+      document.querySelectorAll("[data-stock-menu]").forEach(item => {
+        item.style.display = "none";
+      });
+
+      document.querySelectorAll("[data-stock-menu-toggle]").forEach(item => {
+        item.setAttribute("aria-expanded", "false");
+      });
+
+      if (!isOpen) {
+        menu.style.display = "block";
+        button.setAttribute("aria-expanded", "true");
+      }
+
+    });
+
+  });
+
+  // Close menu when clicking outside
+
+  if (!document.documentElement.dataset.stockMenuListener) {
+
+    document.addEventListener("click", event => {
+
+      if (!event.target.closest("[data-stock-menu-wrap]")) {
+
+        document.querySelectorAll("[data-stock-menu]").forEach(menu => {
+          menu.style.display = "none";
+        });
+
+        document.querySelectorAll("[data-stock-menu-toggle]").forEach(button => {
+          button.setAttribute("aria-expanded", "false");
+        });
+
+      }
+
+    });
+
+    document.documentElement.dataset.stockMenuListener = "true";
+  }
+  
 
   // PRODUCT IMAGE UPLOAD / REPLACE — OWNER ONLY
 
