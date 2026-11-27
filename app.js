@@ -942,63 +942,67 @@ hints.set(
 const reader =
   new window.ZXingBrowser.BrowserMultiFormatReader(hints);
 
-    // CENTER CROP SCANNING WITH FULL FRAME FALLBACK
+    
+    // MULTI-REGION BARCODE SCANNING
 
-const scanCanvas = document.createElement("canvas");
-const scanContext = scanCanvas.getContext("2d");
+    const scanCanvas = document.createElement("canvas");
+    const scanContext = scanCanvas.getContext("2d");
 
-reader.decode = function(videoElement) {
+    reader.decode = function(videoElement) {
 
-  const width = videoElement.videoWidth;
-  const height = videoElement.videoHeight;
+      const width = videoElement.videoWidth;
+      const height = videoElement.videoHeight;
 
-  if (!width || !height) {
-    throw new Error("Camera frame not ready");
-  }
+      if (!width || !height) {
+        throw new Error("Camera frame not ready");
+      }
 
-  scanCanvas.width = width;
-  scanCanvas.height = height;
+      const regions = [
+        [0.65, 1.00],
+        [0.55, 1.00],
+        [0.75, 0.75],
+        [0.65, 0.65],
+        [0.55, 0.55],
+        [0.85, 0.85],
+        [1.00, 1.00]
+      ];
 
-  // First attempt: crop 8% from both sides
-  const sideCrop = Math.floor(width * 0.08);
-  const croppedWidth = width - (sideCrop * 2);
+      let lastError;
 
-  scanContext.drawImage(
-    videoElement,
-    sideCrop,
-    0,
-    croppedWidth,
-    height,
-    0,
-    0,
-    croppedWidth,
-    height
-  );
+      for (const [widthRatio, heightRatio] of regions) {
 
-  try {
+        const cropWidth = Math.floor(width * widthRatio);
+        const cropHeight = Math.floor(height * heightRatio);
 
-    // Try scanning without side borders
-    return reader.decodeFromCanvas(scanCanvas);
+        const sourceX = Math.floor((width - cropWidth) / 2);
+        const sourceY = Math.floor((height - cropHeight) / 2);
 
-  } catch (cropError) {
+        scanCanvas.width = cropWidth;
+        scanCanvas.height = cropHeight;
 
-    // Second attempt: scan the complete frame
-    scanCanvas.width = width;
-    scanCanvas.height = height;
+        scanContext.drawImage(
+          videoElement,
+          sourceX,
+          sourceY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          cropWidth,
+          cropHeight
+        );
 
-    scanContext.drawImage(
-      videoElement,
-      0,
-      0,
-      width,
-      height
-    );
+        try {
+          return reader.decodeFromCanvas(scanCanvas);
+        } catch (error) {
+          lastError = error;
+        }
+      }
 
-    return reader.decodeFromCanvas(scanCanvas);
+      throw lastError || new Error("Barcode not found");
+    };
+      
 
-  }
-
-};
 
     barcodeScannerControls =
       await reader.decodeFromVideoDevice(
