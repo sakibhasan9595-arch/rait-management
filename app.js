@@ -1097,6 +1097,46 @@ showProductDetailsByBarcode(barcode);
 
 }
 
+
+// OPEN ALL PRODUCTS PAGE
+
+$("openProductsFromHome")?.addEventListener("click", () => {
+
+  [
+    "homePanel",
+    "salesPanel",
+    "stockPanel",
+    "reportsPanel",
+    "myProfilePanel",
+    "membersPanel",
+    "usersPanel",
+    "barcodeScannerPanel",
+    "productDetailsPanel"
+  ].forEach(hide);
+
+  show("productsGalleryPanel");
+
+  renderProductsGallery();
+
+});
+
+
+// ADD PRODUCT FROM GALLERY
+
+$("addProductFromGallery")?.addEventListener("click", () => {
+
+  if (!perms("stockCreate")) {
+    return notice("Product Create permission নেই।", "bad");
+  }
+
+  hide("productsGalleryPanel");
+  show("stockPanel");
+
+  showStockView("addProductView");
+
+});
+
+
 $("openBarcodeScannerFromHome")?.addEventListener("click", () => {
 
   [
@@ -1156,7 +1196,8 @@ async function refreshAll() {
     restocks = await readCol("restocks");
 
     renderProducts();
-    renderSaleProductPicker();
+renderProductsGallery();
+renderSaleProductPicker();
   }
 
   if (profile?.role === "owner") {
@@ -2421,6 +2462,7 @@ $("productsList").innerHTML =
       }).join("") ||
       "এখনো কোনো product যোগ করা হয়নি।";
   }
+  
 
   
   // PRODUCT CARD THREE-DOT MENU
@@ -2727,7 +2769,93 @@ document.querySelectorAll("[data-edit-product]").forEach(b => {
   renderSaleProductPicker();
 }
 
-      
+
+// ==========================================
+// ALL PRODUCTS GALLERY
+// ==========================================
+
+function renderProductsGallery() {
+
+  const gallery = $("productsGalleryList");
+  const count = $("productsGalleryCount");
+
+  if (!gallery) return;
+
+  if (count) {
+    count.textContent = products.length + " Products";
+  }
+
+  if (!products.length) {
+    gallery.innerHTML = `
+      <p class="muted" style="grid-column:1/-1;text-align:center;">
+        এখনো কোনো Product যোগ করা হয়নি।
+      </p>
+    `;
+    return;
+  }
+
+  gallery.innerHTML = products.map(p => {
+
+    const imageURL =
+      p.imageUrl || p.imageURL || p.photoURL || "";
+
+    const safeImageURL =
+      /^https:\/\/.+/i.test(String(imageURL).trim())
+        ? esc(String(imageURL).trim())
+        : "";
+
+    const imageHTML = safeImageURL
+      ? `
+        <img
+          class="product-gallery-image"
+          src="${safeImageURL}"
+          alt="${esc(p.name)}"
+          loading="lazy"
+        >
+      `
+      : `
+        <div
+          class="product-gallery-image"
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#888;
+            font-size:12px;
+          "
+        >
+          No Image
+        </div>
+      `;
+
+    return `
+      <div
+        class="product-gallery-card"
+        data-gallery-product-id="${esc(p.id)}"
+      >
+        ${imageHTML}
+
+        <div class="product-gallery-info">
+
+          <div class="product-gallery-name">
+            ${esc(p.name)}
+          </div>
+
+          <div class="product-gallery-variant">
+            ${esc(p.variant)}
+          </div>
+
+        </div>
+      </div>
+    `;
+
+  }).join("");
+
+          }
+
+
+
+
 // ==========================================
 // DAILY + PRODUCT-WISE REPORTS
 // ==========================================
