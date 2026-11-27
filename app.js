@@ -431,6 +431,7 @@ if (profile.photoURL) {
   $("headerPhotoFallback").classList.remove("hidden");
 }
 
+    updateStockActionVisibility();
     show("appView");
 
     if (profile.role === "owner") {
