@@ -605,16 +605,21 @@ $("profilePhotoInput").addEventListener("change", async () => {
         return;
       }
 
-      // Hide all panels
-      [
-        "homePanel",
-        "salesPanel",
-        "stockPanel",
-        "reportsPanel",
-        "myProfilePanel",
-        "membersPanel",
-        "usersPanel"
-      ].forEach(hide);
+
+// Hide all panels
+[
+  "homePanel",
+  "salesPanel",
+  "stockPanel",
+  "reportsPanel",
+  "myProfilePanel",
+  "membersPanel",
+  "usersPanel",
+  "productsGalleryPanel",
+  "barcodeScannerPanel",
+  "productDetailsPanel"
+].forEach(hide);
+
 
       // Show selected panel
       show(b.dataset.tab);
