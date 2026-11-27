@@ -2921,6 +2921,7 @@ $("productsGalleryList")?.addEventListener("click", event => {
     return notice("Product পাওয়া যায়নি।", "bad");
   }
 
+  hide("productsGalleryPanel");
   showProductDetailsByBarcode(product);
 
 });
