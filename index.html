@@ -799,6 +799,60 @@ label{font-size:13px;color:var(--muted)}
   
 </section>
 
+  
+<!-- ALL PRODUCTS PAGE -->
+
+<section id="productsGalleryPanel" class="card hidden">
+
+  <!-- PAGE HEADER -->
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  ">
+
+    <div>
+      <h2 style="margin:0;">All Products</h2>
+      <div class="muted" id="productsGalleryCount">
+        Loading Products...
+      </div>
+    </div>
+
+    <button
+      type="button"
+      id="addProductFromGallery"
+      style="
+        width:auto;
+        min-width:105px;
+        margin:0;
+        padding:9px 12px;
+        border-radius:9px;
+        font-size:12px;
+        white-space:nowrap;
+      "
+    >
+      + Add Products
+    </button>
+
+  </div>
+
+  <!-- PRODUCTS GRID -->
+  <div
+    id="productsGalleryList"
+    style="
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    "
+  >
+    <p class="muted">Products Loading...</p>
+  </div>
+
+</section>
+  
+
   <!-- BARCODE SCANNER PANEL -->
 
 <section id="barcodeScannerPanel" class="card hidden">
