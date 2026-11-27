@@ -618,6 +618,10 @@ $("profilePhotoInput").addEventListener("change", async () => {
       // Show selected panel
       show(b.dataset.tab);
 
+      if (b.dataset.tab === "stockPanel") {
+  showStockView("stockMainView");
+      }
+
       // Update active navigation
       document.querySelectorAll(".nav-item")
         .forEach(item => item.classList.remove("active"));
@@ -682,6 +686,57 @@ $("openReportsFromHome")?.addEventListener("click", () => {
 $("openLowStockFromHome")?.addEventListener("click", () => {
   document.querySelector('[data-tab="stockPanel"]')?.click();
 });
+
+
+// STOCK MANAGEMENT SUB-PAGE NAVIGATION
+
+function showStockView(viewId) {
+  hide("stockMainView");
+  hide("addProductView");
+  hide("restockView");
+
+  show(viewId);
+}
+
+$("openAddProductView")?.addEventListener("click", () => {
+  if (!perms("stockCreate")) {
+    return notice("Stock create permission নেই।", "bad");
+  }
+
+  showStockView("addProductView");
+});
+
+$("openRestockView")?.addEventListener("click", () => {
+  if (!perms("stockCreate")) {
+    return notice("Restock permission নেই।", "bad");
+  }
+
+  showStockView("restockView");
+});
+
+$("backFromAddProduct")?.addEventListener("click", () => {
+  showStockView("stockMainView");
+});
+
+$("backFromRestock")?.addEventListener("click", () => {
+  showStockView("stockMainView");
+});
+
+// Show only permitted stock actions
+function updateStockActionVisibility() {
+  const canCreate = perms("stockCreate");
+
+  if ($("openAddProductView")) {
+    $("openAddProductView").classList.toggle("hidden", !canCreate);
+  }
+
+  if ($("openRestockView")) {
+    $("openRestockView").classList.toggle("hidden", !canCreate);
+  }
+}
+
+updateStockActionVisibility();
+
 
 
 // BARCODE SCANNER OPEN / CLOSE
@@ -2193,8 +2248,9 @@ function renderProducts() {
   </div>
 `;
 
-    $("productsList").innerHTML =
-  stockSummary +
+    $("stockSummary").innerHTML = stockSummary;
+
+$("productsList").innerHTML =
   products.map(p => {
 
         const productRestocks = restocks
