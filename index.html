@@ -413,6 +413,46 @@ label{font-size:13px;color:var(--muted)}
   font-weight: 500;
   }
 
+
+  
+/* BUSINESS TOOLS */
+
+.business-tools-heading {
+  font-size: 13px;
+  color: #000;
+  margin: 22px 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* FEATURE ALIGNMENT */
+
+.feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.feature-item {
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.barcode-feature-btn {
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.feature-label {
+  width: 100%;
+  text-align: center;
+}
+  
+  
   
 /* BARCODE PRODUCT DETAILS */
 
@@ -493,6 +533,76 @@ label{font-size:13px;color:var(--muted)}
   border-radius: 10px;
   padding: 12px;
   margin-top: 8px;
+  }
+
+
+  
+/* ================= PRODUCTS GALLERY ================= */
+
+#productsGalleryPanel .products-gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+#productsGalleryPanel .products-gallery-header h2 {
+  margin: 0;
+}
+
+#productsGalleryPanel .products-add-btn {
+  width: auto;
+  min-width: 105px;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#productsGalleryPanel #productsGalleryList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+#productsGalleryPanel .product-gallery-card {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+#productsGalleryPanel .product-gallery-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+#productsGalleryPanel .product-gallery-info {
+  padding: 9px;
+  text-align: center;
+  min-height: 0;
+}
+
+#productsGalleryPanel .product-gallery-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+#productsGalleryPanel .product-gallery-variant {
+  font-size: 11px;
+  color: #666;
+  overflow-wrap: anywhere;
   }
   
   
@@ -731,9 +841,15 @@ label{font-size:13px;color:var(--muted)}
   </div>
 
 
-  <!-- PRODUCTS FEATURE -->
+<!-- ================= BUSINESS TOOLS ================= -->
 
+<h3 class="business-tools-heading">Business Tools</h3>
+
+<div class="feature-list">
+
+  <!-- PRODUCTS FEATURE -->
   <div class="feature-item">
+
     <button
       type="button"
       class="barcode-feature-btn"
@@ -755,13 +871,22 @@ label{font-size:13px;color:var(--muted)}
         <rect x="28" y="21" width="17" height="14" rx="2"
           stroke="white" stroke-width="2"/>
       </svg>
+
       <span>PRODUCTS</span>
     </button>
 
     <div class="feature-label">
       View All Products
     </div>
+
   </div>
+
+  <!-- ভবিষ্যতে Shops এবং অন্যান্য Business Tools এখানে যোগ হবে -->
+
+</div>
+
+
+<!-- ================= OTHER FEATURES ================= -->
   
   
   <div class="other-features">
