@@ -942,6 +942,64 @@ hints.set(
 const reader =
   new window.ZXingBrowser.BrowserMultiFormatReader(hints);
 
+    // CENTER CROP SCANNING WITH FULL FRAME FALLBACK
+
+const scanCanvas = document.createElement("canvas");
+const scanContext = scanCanvas.getContext("2d");
+
+reader.decode = function(videoElement) {
+
+  const width = videoElement.videoWidth;
+  const height = videoElement.videoHeight;
+
+  if (!width || !height) {
+    throw new Error("Camera frame not ready");
+  }
+
+  scanCanvas.width = width;
+  scanCanvas.height = height;
+
+  // First attempt: crop 8% from both sides
+  const sideCrop = Math.floor(width * 0.08);
+  const croppedWidth = width - (sideCrop * 2);
+
+  scanContext.drawImage(
+    videoElement,
+    sideCrop,
+    0,
+    croppedWidth,
+    height,
+    0,
+    0,
+    croppedWidth,
+    height
+  );
+
+  try {
+
+    // Try scanning without side borders
+    return reader.decodeFromCanvas(scanCanvas);
+
+  } catch (cropError) {
+
+    // Second attempt: scan the complete frame
+    scanCanvas.width = width;
+    scanCanvas.height = height;
+
+    scanContext.drawImage(
+      videoElement,
+      0,
+      0,
+      width,
+      height
+    );
+
+    return reader.decodeFromCanvas(scanCanvas);
+
+  }
+
+};
+
     barcodeScannerControls =
       await reader.decodeFromVideoDevice(
         undefined,
