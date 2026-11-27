@@ -771,13 +771,21 @@ function stopBarcodeScanner() {
 // ==========================================
 
 let barcodeSelectedProductId = null;
+let productDetailsReturnPanel = "homePanel";
 
 function showProductDetailsByBarcode(barcode) {
 
   const status = $("barcodeScannerStatus");
 
+  
+let product = null;
+
+if (barcode && typeof barcode === "object") {
+  product = products.find(p => p.id === barcode.id);
+  productDetailsReturnPanel = "productsGalleryPanel";
+} else {
   const matches = products.filter(
-    p => String(p.barcode || "").trim() === barcode
+    p => String(p.barcode || "").trim() === String(barcode).trim()
   );
 
   if (matches.length === 0) {
@@ -791,9 +799,41 @@ function showProductDetailsByBarcode(barcode) {
     return;
   }
 
-  const product = matches[0];
+  product = matches[0];
+  productDetailsReturnPanel = "homePanel";
+}
+
+if (!product) {
+  notice("Product পাওয়া যায়নি।", "bad");
+  return;
+}
 
   barcodeSelectedProductId = product.id;
+
+
+const stockStatus = getStockStatus(product);
+const statusBadge = $("detailStockStatus");
+
+if (statusBadge) {
+  statusBadge.textContent = stockStatus.label;
+
+  statusBadge.style.background =
+    stockStatus.key === "in" ? "#dcfce7" :
+    stockStatus.key === "low" ? "#fef3c7" :
+    stockStatus.key === "critical" ? "#fee2e2" :
+    "#e5e7eb";
+
+  statusBadge.style.color =
+    stockStatus.key === "in" ? "#166534" :
+    stockStatus.key === "low" ? "#92400e" :
+    stockStatus.key === "critical" ? "#991b1b" :
+    "#374151";
+}
+
+$("detailBarcodeNumber").textContent =
+  product.barcode || "Not Set";
+  
+  
 
   stopBarcodeScanner();
 
@@ -907,14 +947,20 @@ function showProductDetailsByBarcode(barcode) {
 
 // CLOSE PRODUCT DETAILS
 
+
 $("closeProductDetails")?.addEventListener("click", () => {
 
   hide("productDetailsPanel");
-  show("homePanel");
+  show(productDetailsReturnPanel);
+
+  if (productDetailsReturnPanel === "productsGalleryPanel") {
+    renderProductsGallery();
+  }
 
   barcodeSelectedProductId = null;
 
 });
+
 
 // DATE RANGE SALES SUMMARY
 
@@ -2858,6 +2904,26 @@ function renderProductsGallery() {
 
           }
 
+
+ // OPEN PRODUCT DETAILS FROM GALLERY
+
+$("productsGalleryList")?.addEventListener("click", event => {
+
+  const card = event.target.closest("[data-gallery-product-id]");
+
+  if (!card) return;
+
+  const product = products.find(
+    p => p.id === card.dataset.galleryProductId
+  );
+
+  if (!product) {
+    return notice("Product পাওয়া যায়নি।", "bad");
+  }
+
+  showProductDetailsByBarcode(product);
+
+});
 
 
 
