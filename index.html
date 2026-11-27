@@ -938,46 +938,178 @@ label{font-size:13px;color:var(--muted)}
   </section>
   
 
-  <!-- STOCK MANAGEMENT -->
 
-  <section id="stockPanel" class="card hidden">
-    <h2>Stock Management</h2>
+<!-- STOCK MANAGEMENT -->
 
-    <!-- PRODUCTS AND REMAINING STOCK FIRST -->
+<section id="stockPanel" class="card hidden">
+
+  <h2>Stock Management</h2>
+
+  <!-- MAIN STOCK VIEW -->
+  <div id="stockMainView">
+
+    <!-- CURRENT STOCK SUMMARY -->
+    <div id="stockSummary"></div>
+
+    <!-- ADD PRODUCT & RESTOCK CARDS -->
+    <div style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:16px 0;
+    ">
+
+      <button
+        type="button"
+        id="openAddProductView"
+        class="secondary"
+        style="
+          min-height:105px;
+          margin:0;
+          border:1px solid #ddd;
+          border-radius:12px;
+          background:#fff;
+          color:#222;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+        "
+      >
+        <span style="font-size:28px;">＋</span>
+        <b>Add Products</b>
+      </button>
+
+      <button
+        type="button"
+        id="openRestockView"
+        class="secondary"
+        style="
+          min-height:105px;
+          margin:0;
+          border:1px solid #ddd;
+          border-radius:12px;
+          background:#fff;
+          color:#222;
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+        "
+      >
+        <span style="font-size:28px;">↻</span>
+        <b>Restock</b>
+      </button>
+
+    </div>
+
+    <!-- PRODUCT LIST -->
     <h3>Products & Remaining Stock</h3>
     <div id="productsList"></div>
 
-    <!-- ADD PRODUCT -->
-    <h3>Add Product</h3>
-    <div class="row">
-      <input id="pName" placeholder="Product name">
-      <input id="pVariant" placeholder="Variant (e.g. 100 pages)">
-      <input id="pOpening" type="number" min="0" placeholder="Opening stock">
-      <input
-  id="pMinimum"
-  type="number"
-  min="0"
-  step="1"
-  placeholder="Minimum stock quantity"
->
-      <input
-  id="pBarcode"
-  type="text"
-  placeholder="Barcode Number (Optional)"
->
+  </div>
+
+
+  <!-- ADD PRODUCT PAGE -->
+  <div id="addProductView" class="hidden">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:15px;
+    ">
+      <h3 style="margin:0;">Add Product</h3>
+
+      <button
+        type="button"
+        id="backFromAddProduct"
+        class="secondary"
+        style="width:auto;margin:0;"
+      >← Back</button>
     </div>
+
+    <div class="row">
+
+      <input id="pName" placeholder="Product name">
+
+      <input
+        id="pVariant"
+        placeholder="Variant (e.g. 100 pages)"
+      >
+
+      <input
+        id="pOpening"
+        type="number"
+        min="0"
+        placeholder="Opening stock"
+      >
+
+      <input
+        id="pMinimum"
+        type="number"
+        min="0"
+        step="1"
+        placeholder="Minimum stock quantity"
+      >
+
+      <input
+        id="pBarcode"
+        type="text"
+        placeholder="Barcode Number (Optional)"
+      >
+
+    </div>
+
     <button id="addProduct">Add Product</button>
 
-    <!-- RESTOCK -->
-    <h3>Restock</h3>
-    <div class="row">
-      <select id="rProduct"></select>
-      <input id="rQty" type="number" min="1" placeholder="Quantity">
-      <input id="rDate" type="date">
+  </div>
+
+
+  <!-- RESTOCK PAGE -->
+  <div id="restockView" class="hidden">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:15px;
+    ">
+      <h3 style="margin:0;">Restock</h3>
+
+      <button
+        type="button"
+        id="backFromRestock"
+        class="secondary"
+        style="width:auto;margin:0;"
+      >← Back</button>
     </div>
+
+    <div class="row">
+
+      <select id="rProduct"></select>
+
+      <input
+        id="rQty"
+        type="number"
+        min="1"
+        placeholder="Quantity"
+      >
+
+      <input id="rDate" type="date">
+
+    </div>
+
     <button id="addRestock">Save Restock</button>
 
-  </section>
+  </div>
+
+</section>
+
 
 <!-- REPORTS -->
 
