@@ -24,6 +24,10 @@ import {
   runTransaction,
   enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  BarcodeFormat,
+  DecodeHintType
+} from "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/+esm";
 
 
 // FIREBASE CONFIG
@@ -909,8 +913,34 @@ async function startBarcodeScanner() {
 
     status.textContent = "Camera চালু হচ্ছে...";
 
-    const reader =
-      new window.ZXingBrowser.BrowserMultiFormatReader();
+    const hints = new Map();
+
+hints.set(
+  DecodeHintType.TRY_HARDER,
+  true
+);
+
+hints.set(
+  DecodeHintType.POSSIBLE_FORMATS,
+  [
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.UPC_E,
+    BarcodeFormat.CODE_39,
+    BarcodeFormat.CODE_93,
+    BarcodeFormat.ITF,
+    BarcodeFormat.CODABAR,
+    BarcodeFormat.QR_CODE,
+    BarcodeFormat.DATA_MATRIX,
+    BarcodeFormat.PDF_417,
+    BarcodeFormat.AZTEC
+  ]
+);
+
+const reader =
+  new window.ZXingBrowser.BrowserMultiFormatReader(hints);
 
     barcodeScannerControls =
       await reader.decodeFromVideoDevice(
